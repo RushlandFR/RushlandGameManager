@@ -1,9 +1,9 @@
-package fr.rushland.main;
+package fr.rushland.gamemanager;
 
-
-import fr.rushland.main.utils.CodeUtils;
 
 import java.util.ArrayList;
+
+import fr.rushland.gamemanager.utils.CodeUtils;
 
 /**
  * Created by Zaral on 11/04/2016.

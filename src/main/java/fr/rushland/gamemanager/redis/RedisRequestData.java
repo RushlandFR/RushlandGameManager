@@ -1,4 +1,4 @@
-package fr.rushland.main.redis;
+package fr.rushland.gamemanager.redis;
 
 /**
 *

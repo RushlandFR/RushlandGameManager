@@ -1,8 +1,9 @@
-package fr.rushland.main.server;
+package fr.rushland.gamemanager.server;
 
-import fr.rushland.main.Game;
-import fr.rushland.main.GameMapOption;
 import org.apache.commons.io.FileUtils;
+
+import fr.rushland.gamemanager.Game;
+import fr.rushland.gamemanager.GameMapOption;
 
 import java.io.*;
 import java.util.ArrayList;

@@ -1,11 +1,11 @@
-package fr.rushland.main;
-
-import fr.rushland.main.redis.RedisDataSender;
-import fr.rushland.main.redis.RedisRequestData;
-import fr.rushland.main.redis.RedisRequestHandler;
+package fr.rushland.gamemanager;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
+
+import fr.rushland.gamemanager.redis.RedisDataSender;
+import fr.rushland.gamemanager.redis.RedisRequestData;
+import fr.rushland.gamemanager.redis.RedisRequestHandler;
 
 /**
  * Created by Zaral on 10/04/2016.

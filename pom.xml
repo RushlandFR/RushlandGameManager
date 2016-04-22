@@ -85,7 +85,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>fr.rushland.main.Main</mainClass>
+                            <mainClass>fr.rushland.gamemanager.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

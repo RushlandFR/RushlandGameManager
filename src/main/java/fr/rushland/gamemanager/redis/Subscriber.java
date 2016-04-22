@@ -1,10 +1,12 @@
-package fr.rushland.main.redis;
+package fr.rushland.gamemanager.redis;
 
 import com.google.gson.Gson;
-import fr.rushland.main.Game;
-import fr.rushland.main.GameMapOption;
-import fr.rushland.main.Main;
-import fr.rushland.main.server.CreateServer;
+
+import fr.rushland.gamemanager.Game;
+import fr.rushland.gamemanager.GameMapOption;
+import fr.rushland.gamemanager.Main;
+import fr.rushland.gamemanager.server.CreateServer;
+
 import org.apache.commons.io.FileUtils;
 import redis.clients.jedis.JedisPubSub;
 

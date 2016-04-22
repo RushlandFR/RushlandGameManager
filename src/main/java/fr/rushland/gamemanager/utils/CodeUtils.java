@@ -1,4 +1,4 @@
-package fr.rushland.main.utils;
+package fr.rushland.gamemanager.utils;
 
 import java.util.Random;
 
