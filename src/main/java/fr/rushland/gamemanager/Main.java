@@ -17,8 +17,6 @@ public class Main {
 
     public static int port = 41000;
 
-    //test1
-    //test2
 
     public static void main(String[] args) {
         Logger.getGlobal().info("Starting RushlandGameManager program...");
