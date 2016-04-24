@@ -173,7 +173,7 @@ public class Subscriber extends JedisPubSub {
                                 findGame(player, gameMap, game);
                             }
                         },
-                        2000
+                        4000
                 );
             }
         } else {
