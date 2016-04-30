@@ -8,17 +8,17 @@ import java.util.logging.Logger;
 
 public class RedisDataSender {
 
-	public static String serverId;
-	public static String channelSub = "RLGame";
-	public static Publisher getPublisher = null;
+    public static String serverId;
+    public static String channelSub = "RLGame";
+    public static Publisher getPublisher = null;
 
-	public static void setup(String gameType) {
-		serverId = gameType;
-		subscribeChannels();
-		//refreshTimer();
-	}
+    public static void setup(String gameType) {
+        serverId = gameType;
+        subscribeChannels();
+        //refreshTimer();
+    }
 
-/*	public static void sendData() {
+    /*	public static void sendData() {
 		String key = "RLSrvData-" + serverId;
 		String value = Variables.motd + "_" + Bukkit.getServer().getOnlinePlayers().size() + "_" + Bukkit.getServer().getMaxPlayers();
 		Jedis jedis = JedisFactory.getInstance().getJedisPool().getResource();
@@ -36,29 +36,29 @@ public class RedisDataSender {
 			}
 		}, 20L * 4);
 	}
-	*/
+     */
 
-	private static void subscribeChannels() {
-		final Jedis subscriberJedis = JedisFactory.getInstance().getJedisPool().getResource();
+    private static void subscribeChannels() {
+        final Jedis subscriberJedis = JedisFactory.getInstance().getJedisPool().getResource();
 
-		final Subscriber subscriber = new Subscriber(); //permet de reçevoir les données
+        final Subscriber subscriber = new Subscriber(); //permet de reçevoir les données
 
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					Logger.getGlobal().info("Subscribing to '" + channelSub + "' channel");
-					subscriberJedis.subscribe(subscriber, channelSub);
-					Logger.getGlobal().info("Subscription ended.");
-				} catch (Exception e) {
-					Logger.getGlobal().log(Level.SEVERE, "Subscribing failed", e );
-				}
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    Logger.getGlobal().info("Subscribing to '" + channelSub + "' & 'RLGamePS' channel");
+                    subscriberJedis.subscribe(subscriber, channelSub, "RLGamePS");
+                    Logger.getGlobal().info("Subscription ended.");
+                } catch (Exception e) {
+                    Logger.getGlobal().log(Level.SEVERE, "Subscribing failed", e );
+                }
 
-			}
-		}).start();
+            }
+        }).start();
 
-		final Jedis publisherJedis = JedisFactory.getInstance().getJedisPool().getResource();
+        final Jedis publisherJedis = JedisFactory.getInstance().getJedisPool().getResource();
 
-		getPublisher = new Publisher(publisherJedis, channelSub);
+        getPublisher = new Publisher(publisherJedis, channelSub);
 
-	}
+    }
 }

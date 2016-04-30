@@ -26,7 +26,26 @@ public class Subscriber extends JedisPubSub {
     @Override
     public void onMessage(String channel, String message) {
         //Reçois les messages.
-        if (channel.equals(RedisDataSender.channelSub)) {
+        if (channel.equals("RLGamePS")) {
+            String[] packet = message.split("#");
+            System.out.println("Received packet '" + message + "' from Proxy");
+            if (packet[0].equals("members")) {
+                String member = packet[2];
+                if (packet[1].equals("add")) {
+                    Main.partyMembers.add(member);
+                } else if (packet[1].equals("remove")) {
+                    Main.partyMembers.remove(member);
+                }
+            } else if (packet[0].equals("slots")) {
+                String leader = packet[2];
+                int slots = Integer.parseInt(packet[3]);
+                if (packet[1].equals("put")) {
+                    Main.partySlotsByLeader.put(leader, slots);
+                } else if (packet[1].equals("remove")) {
+                    Main.partySlotsByLeader.remove(leader);
+                }
+            }
+        } else if (channel.equals(RedisDataSender.channelSub)) {
             String[] msg = message.split("#");
             if (msg[0].equals("init")) {
                 /*           String gameType = msg[1];
@@ -94,7 +113,7 @@ public class Subscriber extends JedisPubSub {
                 }
                 RedisRequestData bestServer = null;
                 for (Game typeGame : game) {
-                    RedisRequestData data = typeGame.findBetterGame();
+                    RedisRequestData data = typeGame.findBetterGame(); //TODO
                     if (data == null) break;
                     if (bestServer == null) {
                         bestServer = data;

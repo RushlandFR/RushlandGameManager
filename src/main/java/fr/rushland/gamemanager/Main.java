@@ -1,6 +1,7 @@
 package fr.rushland.gamemanager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import fr.rushland.gamemanager.redis.RedisDataSender;
@@ -14,6 +15,8 @@ public class Main {
     public static ArrayList<Game> listGames = new ArrayList<Game>();
     public static ArrayList<Integer> freePort = new ArrayList<Integer>();
     public static ArrayList<GameMapOption> listOption = new ArrayList<>();
+    public static ArrayList<String> partyMembers = new ArrayList<String>();
+    public static HashMap<String, Integer> partySlotsByLeader = new HashMap<String, Integer>();
 
     public static int port = 41000;
 
