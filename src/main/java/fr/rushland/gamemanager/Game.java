@@ -99,11 +99,11 @@ public class Game {
      */
     public String findValidGame() {
         if (hasWaitingGames()) {
-            System.out.print("\nGameForFindGame: " + gameType);
-            System.out.print("\nOptionForFindGame: " + option);
+            System.out.println("\nGameForFindGame: " + gameType);
+            System.out.println("\nOptionForFindGame: " + option);
             for (int port : waitingGames) {
                 String serverName = gameType + port;
-                System.out.print("\nGame: " + serverName);
+                System.out.println("\nGame: " + serverName);
 
                 RedisRequestData data = new RedisRequestHandler(serverName).getData();
                 if (data == null) {
@@ -120,7 +120,7 @@ public class Game {
                     }
 
                 }
-                System.out.print("\ndata '" + data.getMotd() + "'");
+                System.out.println("\ndata '" + data.getMotd() + "'");
                 if (data.getMotd().equalsIgnoreCase("§2Ouvert")) {
                     return serverName;
                 } else if (data.getMotd().equals("§cEn jeu")) {
@@ -323,13 +323,13 @@ public class Game {
      */
     private void cooldownGameCreated() {
         if (gameRecentlyCreated) {
-            System.out.print("Game " + option + " recently created, wait few seconds");
+            System.out.println("Game " + option + " recently created, wait few seconds");
             new java.util.Timer().schedule(
                     new java.util.TimerTask() {
                         @Override
                         public void run() {
                             gameRecentlyCreated = false;
-                            System.out.print("Game " + option + " can create game");
+                            System.out.println("Game " + option + " can create game");
 
                         }
                     },

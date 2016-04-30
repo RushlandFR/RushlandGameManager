@@ -56,16 +56,16 @@ public class Subscriber extends JedisPubSub {
                     game = new Game(gameMap.getGameType(), gameMap.getMaxPlayers(), gameMap.getGameOption());
                 }
 
-                System.out.print("\nGameOption: " + game.getOption());
-                System.out.print("\nGame: " + game.getGameType());
+                System.out.println("\nGameOption: " + game.getOption());
+                System.out.println("\nGame: " + game.getGameType());
 
                 findGame(player, gameMap, game);
 
             } else if (msg[0].equals("delete")) {
                 String typeGame = msg[1];
                 int port = Integer.parseInt(msg[2]);
-                System.out.print("\nDelete Game: " + typeGame);
-                System.out.print("\nDelete Port: " + port);
+                System.out.println("\nDelete Game: " + typeGame);
+                System.out.println("\nDelete Port: " + port);
 
                 Game game = Main.findGame(port);
                 if (game == null) {
@@ -73,7 +73,7 @@ public class Subscriber extends JedisPubSub {
                     return;
                 }
 
-                System.out.print("\nOption de la game a supprimer: " + game.getOption());
+                System.out.println("\nOption de la game a supprimer: " + game.getOption());
                 if (new File(game.getGame(port)).exists()) {
                     try {
                         FileUtils.deleteDirectory(new File(game.getGame(port)));
@@ -107,7 +107,7 @@ public class Subscriber extends JedisPubSub {
                 if (bestServer == null) {
                     Game type = game.get(0);
                     if (type == null) {
-                        System.out.print("Error during creation of game");
+                        System.out.println("Error during creation of game");
                         RedisDataSender.getPublisher.publish("say#" + playerName + "#Aucun joueur n'est actuellement en attente dans ce mode de jeu, si vous tenez à jouer à ce mode de jeu," +
                                 "merci de choisir une option.");
 
@@ -150,7 +150,7 @@ public class Subscriber extends JedisPubSub {
                 final int finalPort = port;
                 final Game finalGame = game;
                 //Creation du serveur
-                System.out.print("\nPort: " + port);
+                System.out.println("\nPort: " + port);
                 final CreateServer newSrv = new CreateServer(game, gameMap, port);
                 newSrv.copyGameServer();
 
@@ -177,7 +177,7 @@ public class Subscriber extends JedisPubSub {
                 );
             }
         } else {
-            System.out.print("\nSend player to: " + validGame);
+            System.out.println("\nSend player to: " + validGame);
             RedisDataSender.getPublisher.publish("send#" + player + "#" + validGame);
         }
 

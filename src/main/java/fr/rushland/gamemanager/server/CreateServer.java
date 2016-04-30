@@ -137,7 +137,7 @@ public class CreateServer {
             BufferedWriter bf = new BufferedWriter(fw);
             bf.write("id: " + this.port);
             bf.newLine();
-            System.out.print("teams: " + this.option.withTeam());
+            System.out.println("teams: " + this.option.withTeam());
             if (!game.getGameType().equals("antwars"))
                 bf.write("teams: " + this.option.withTeam());
             else
@@ -212,7 +212,7 @@ public class CreateServer {
             String invocation ="java -Xms750M -Xmx750M -jar " + service;
             //Runtime.getRuntime().exec("screen -S caca2 echo test");
             String command = "screen -dmS " + serverName  + " "+ invocation;
-            System.out.print("Commande:" + command);
+            System.out.println("Commande:" + command);
             Runtime.getRuntime().exec(command);
 */
             String command = "./" + serverName + ".sh";
