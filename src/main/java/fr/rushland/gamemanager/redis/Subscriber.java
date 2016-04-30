@@ -77,10 +77,7 @@ public class Subscriber extends JedisPubSub {
                     Logger.getGlobal().severe("Game is null !");
                     return;
                 }
-                
-                RedisDataSender.getPublisher.publish("say#" + player + "#§6============================================");
-                RedisDataSender.getPublisher.publish("say#" + player + "#§eVous avez rejoint la file d'attente du mode de jeu: " + CodeUtils.formatNPCType(gameMap.getGameType()));
-                RedisDataSender.getPublisher.publish("say#" + player + "#§6============================================");
+                RedisDataSender.getPublisher.publish("queuejoinedmsg#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()));
 
                 Game game = Main.findGame(gameMap.getGameOption(), gameMap.getGameType());
                 if (game == null) {
