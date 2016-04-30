@@ -29,13 +29,13 @@ public class Subscriber extends JedisPubSub {
         if (channel.equals(RedisDataSender.channelSub)) {
             String[] msg = message.split("#");
             if (msg[0].equals("init")) {
-     /*           String gameType = msg[1];
+                /*           String gameType = msg[1];
                 String option = msg[2];
                 int maxPlayers = Integer.parseInt(msg[3]);
                 String map = msg[4];
                 new GameQueue(gameType, maxPlayers, map, option);
                 return;
-                */
+                 */
             } else if (msg[0].equals("findGame")) {
 
                 final String player = msg[1];
@@ -119,7 +119,7 @@ public class Subscriber extends JedisPubSub {
                         if (gameMap == null) {
                             RedisDataSender.getPublisher.publish("say#" + playerName + "#Aucun joueur n'est actuellement en attente dans ce mode de jeu, si vous tenez à jouer à ce mode de jeu," +
                                     "merci de choisir une option.");
-                        return;
+                            return;
                         }
                         findGame(playerName, gameMap, type);
                     } catch (Exception e) {
@@ -164,7 +164,7 @@ public class Subscriber extends JedisPubSub {
                             }
                         },
                         2000
-                );
+                        );
             } else {
                 new java.util.Timer().schedule(
                         new java.util.TimerTask() {
@@ -174,7 +174,7 @@ public class Subscriber extends JedisPubSub {
                             }
                         },
                         4000
-                );
+                        );
             }
         } else {
             System.out.println("\nSend player to: " + validGame);

@@ -136,17 +136,20 @@ public class Game {
         return null;
     }
 
-    public RedisRequestData findBetterGame() {
+    public RedisRequestData findBetterGame(int requiredSlots) {
         RedisRequestData bestServer = null;
         for (int waitingGame : waitingGames) {
             RedisRequestData data = pingServer(gameType + waitingGame);
             if (data == null) break;
             if (data.getMotd().equalsIgnoreCase("§2Ouvert")) {
-                if (bestServer == null) {
-                    bestServer = data;
-                } else {
-                    if (bestServer.getOnlinePlayers() < data.getOnlinePlayers()) {
+                int freeSlots = data.getMaxPlayers() - data.getOnlinePlayers();
+                if (freeSlots >= requiredSlots) {
+                    if (bestServer == null) {
                         bestServer = data;
+                    } else {
+                        if (bestServer.getOnlinePlayers() < data.getOnlinePlayers()) {
+                            bestServer = data;
+                        }
                     }
                 }
             }
@@ -334,7 +337,7 @@ public class Game {
                         }
                     },
                     6000
-            );
+                    );
         }
     }
 
