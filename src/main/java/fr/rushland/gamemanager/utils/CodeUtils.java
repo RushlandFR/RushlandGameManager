@@ -19,5 +19,27 @@ public class CodeUtils {
 
         return randomNum;
     }
+    
+    public static String formatNPCType(String type) {
+        if (type.equalsIgnoreCase("rush")) {
+                return "Rush";
+        } else if (type.equalsIgnoreCase("rushevent")) {
+                return "RushEvent";
+        } else if (type.equalsIgnoreCase("rushtheflag")) {
+                return "RushTheFlag";
+        } else if (type.equalsIgnoreCase("antwars")) {
+                return "AntWars";
+        } else if (type.equalsIgnoreCase("skywars")) {
+                return "SkyWars";
+        } else if (type.equalsIgnoreCase("buildchampion")) {
+                return "BuildChampion";
+        } else if (type.equalsIgnoreCase("divided")) {
+                return "DividedTogether";
+        } else if (type.equalsIgnoreCase("pvpbox")) {
+                return "PVPBox";
+        } else {
+                return "ERROR";
+        }
+    }
 
 }

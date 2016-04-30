@@ -6,6 +6,7 @@ import fr.rushland.gamemanager.Game;
 import fr.rushland.gamemanager.GameMapOption;
 import fr.rushland.gamemanager.Main;
 import fr.rushland.gamemanager.server.CreateServer;
+import fr.rushland.gamemanager.utils.CodeUtils;
 
 import org.apache.commons.io.FileUtils;
 import redis.clients.jedis.JedisPubSub;
@@ -56,8 +57,16 @@ public class Subscriber extends JedisPubSub {
                 return;
                  */
             } else if (msg[0].equals("findGame")) {
-
                 final String player = msg[1];
+                if (Main.partyMembers.contains(player)) {
+                    RedisDataSender.getPublisher.publish("say#" + player + "#§cSeul le chef de votre groupe peut rejoindre une file d'attente.");
+                    return;
+                }
+                int requiredSlots = 1;
+                if (Main.partySlotsByLeader.containsKey(player)) {
+                    requiredSlots = Main.partySlotsByLeader.get(player);
+                }
+
                 final String gsonString = msg[2];
 
                 Gson gson = new Gson();
@@ -68,6 +77,10 @@ public class Subscriber extends JedisPubSub {
                     Logger.getGlobal().severe("Game is null !");
                     return;
                 }
+                
+                RedisDataSender.getPublisher.publish("say#" + player + "#§6============================================");
+                RedisDataSender.getPublisher.publish("say#" + player + "#§eVous avez rejoint la file d'attente du mode de jeu: " + CodeUtils.formatNPCType(gameMap.getGameType()));
+                RedisDataSender.getPublisher.publish("say#" + player + "#§6============================================");
 
                 Game game = Main.findGame(gameMap.getGameOption(), gameMap.getGameType());
                 if (game == null) {
@@ -75,16 +88,16 @@ public class Subscriber extends JedisPubSub {
                     game = new Game(gameMap.getGameType(), gameMap.getMaxPlayers(), gameMap.getGameOption());
                 }
 
-                System.out.println("\nGameOption: " + game.getOption());
-                System.out.println("\nGame: " + game.getGameType());
+                System.out.println("GameOption: " + game.getOption());
+                System.out.println("Game: " + game.getGameType());
 
-                findGame(player, gameMap, game);
+                findGame(player, gameMap, game, requiredSlots);
 
             } else if (msg[0].equals("delete")) {
                 String typeGame = msg[1];
                 int port = Integer.parseInt(msg[2]);
-                System.out.println("\nDelete Game: " + typeGame);
-                System.out.println("\nDelete Port: " + port);
+                System.out.println("Delete Game: " + typeGame);
+                System.out.println("Delete Port: " + port);
 
                 Game game = Main.findGame(port);
                 if (game == null) {
@@ -92,7 +105,7 @@ public class Subscriber extends JedisPubSub {
                     return;
                 }
 
-                System.out.println("\nOption de la game a supprimer: " + game.getOption());
+                System.out.println("Option de la game a supprimer: " + game.getOption());
                 if (new File(game.getGame(port)).exists()) {
                     try {
                         FileUtils.deleteDirectory(new File(game.getGame(port)));
@@ -103,6 +116,14 @@ public class Subscriber extends JedisPubSub {
                 game.removeStartedGame(port);
             } else if (msg[0].equals("random")) {
                 String playerName = msg[1];
+                if (Main.partyMembers.contains(playerName)) {
+                    RedisDataSender.getPublisher.publish("say#" + playerName + "#§cSeul le chef de votre groupe peut rejoindre une file d'attente.");
+                    return;
+                }
+                int requiredSlots = 1;
+                if (Main.partySlotsByLeader.containsKey(playerName)) {
+                    requiredSlots = Main.partySlotsByLeader.get(playerName);
+                }
                 ArrayList<Game> game = Main.findGame(msg[2]);
 
                 if (game.size() == 0) {
@@ -113,7 +134,7 @@ public class Subscriber extends JedisPubSub {
                 }
                 RedisRequestData bestServer = null;
                 for (Game typeGame : game) {
-                    RedisRequestData data = typeGame.findBetterGame(); //TODO
+                    RedisRequestData data = typeGame.findBetterGame(requiredSlots);
                     if (data == null) break;
                     if (bestServer == null) {
                         bestServer = data;
@@ -140,7 +161,7 @@ public class Subscriber extends JedisPubSub {
                                     "merci de choisir une option.");
                             return;
                         }
-                        findGame(playerName, gameMap, type);
+                        findGame(playerName, gameMap, type, requiredSlots);
                     } catch (Exception e) {
                         RedisDataSender.getPublisher.publish("say#" + playerName + "#Aucun joueur n'est actuellement en attente dans ce mode de jeu, si vous tenez à jouer à ce mode de jeu," +
                                 "merci de choisir une option.");
@@ -153,8 +174,8 @@ public class Subscriber extends JedisPubSub {
         }
     }
 
-    public void findGame(final String player, final GameMapOption gameMap, final Game game) {
-        String validGame = game.findValidGame();
+    public void findGame(final String player, final GameMapOption gameMap, final Game game, final int requiredSlots) {
+        String validGame = game.findValidGame(requiredSlots);
         if (validGame == null) {
             if (!game.gameRecentlyCreated()) {
                 game.setGameRecentlyCreated();
@@ -169,7 +190,7 @@ public class Subscriber extends JedisPubSub {
                 final int finalPort = port;
                 final Game finalGame = game;
                 //Creation du serveur
-                System.out.println("\nPort: " + port);
+                System.out.println("Port: " + port);
                 final CreateServer newSrv = new CreateServer(game, gameMap, port);
                 newSrv.copyGameServer();
 
@@ -189,14 +210,14 @@ public class Subscriber extends JedisPubSub {
                         new java.util.TimerTask() {
                             @Override
                             public void run() {
-                                findGame(player, gameMap, game);
+                                findGame(player, gameMap, game, requiredSlots);
                             }
                         },
                         4000
                         );
             }
         } else {
-            System.out.println("\nSend player to: " + validGame);
+            System.out.println("Send player to: " + validGame);
             RedisDataSender.getPublisher.publish("send#" + player + "#" + validGame);
         }
 

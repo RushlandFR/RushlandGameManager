@@ -97,13 +97,13 @@ public class Game {
      *
      * @return Renvoie une partie valide
      */
-    public String findValidGame() {
+    public String findValidGame(final int requiredSlots) {
         if (hasWaitingGames()) {
-            System.out.println("\nGameForFindGame: " + gameType);
-            System.out.println("\nOptionForFindGame: " + option);
+            System.out.println("GameForFindGame: " + gameType);
+            System.out.println("OptionForFindGame: " + option);
             for (int port : waitingGames) {
                 String serverName = gameType + port;
-                System.out.println("\nGame: " + serverName);
+                System.out.println("Game: " + serverName);
 
                 RedisRequestData data = new RedisRequestHandler(serverName).getData();
                 if (data == null) {
@@ -120,9 +120,12 @@ public class Game {
                     }
 
                 }
-                System.out.println("\ndata '" + data.getMotd() + "'");
+                System.out.println("data '" + data.getMotd() + "'"); //TODO
                 if (data.getMotd().equalsIgnoreCase("§2Ouvert")) {
-                    return serverName;
+                    int freeSlots = data.getMaxPlayers() - data.getOnlinePlayers();
+                    if (freeSlots >= requiredSlots) {
+                        return serverName;
+                    }
                 } else if (data.getMotd().equals("§cEn jeu")) {
                     addStartedGame(port);
                 } else if (data.getMotd().equals("§l§cFermé")) {
