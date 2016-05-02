@@ -73,6 +73,11 @@ public class Subscriber extends JedisPubSub {
 
                 GameMapOption gameMap = gson.fromJson(gsonString, GameMapOption.class); //Permet de générer la map etc...
 
+                if (requiredSlots > gameMap.getMaxPlayers()) {
+                    RedisDataSender.getPublisher.publish("say#" + player + "#§cVotre groupe contient trop de joueurs pour ce mode de jeu.");
+                    return;
+                }
+                
                 if (gameMap == null) {
                     Logger.getGlobal().severe("Game is null !");
                     return;
