@@ -16,6 +16,7 @@ public class GameMapOption {
     private int maxPlayers;
     private boolean team = false;
     private String name;
+    private int order;
 
     public GameMapOption(String gameType, String option, ArrayList<String> listMap, int maxPlayers, String name, boolean team) {
         this.gameType = gameType;
@@ -23,6 +24,7 @@ public class GameMapOption {
         this.listMap = listMap;
         this.maxPlayers = maxPlayers;
         this.name = name;
+        this.order = order;
         this.team = team;
         Main.listOption.add(this);
       //  Main.getInstance().getQueueManager().gameMapOption.add(this);
@@ -47,6 +49,10 @@ public class GameMapOption {
 
     public String getName() {
         return this.name;
+    }
+    
+    public int getOrder() {
+        return this.order;
     }
 
     public int getMaxPlayers() {
