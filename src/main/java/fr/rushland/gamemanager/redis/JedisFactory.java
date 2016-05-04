@@ -11,7 +11,7 @@ public class JedisFactory {
 	private static JedisPool jedisPool;
 
 	public JedisFactory() {
-		jedisPool = new JedisPool("167.114.240.120", 6379);
+		jedisPool = new JedisPool("127.0.0.1", 6379);
 	}
 
 	public JedisPool getJedisPool() {
