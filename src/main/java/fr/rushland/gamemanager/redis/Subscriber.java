@@ -39,7 +39,10 @@ public class Subscriber extends JedisPubSub {
                 }
             } else if (packet[0].equals("slots")) {
                 String leader = packet[2];
-                int slots = Integer.parseInt(packet[3]);
+                int slots = 1;
+                if (packet.length > 3) {
+                    slots = Integer.parseInt(packet[3]);
+                }
                 if (packet[1].equals("put")) {
                     Main.partySlotsByLeader.put(leader, slots);
                 } else if (packet[1].equals("remove")) {
@@ -77,12 +80,12 @@ public class Subscriber extends JedisPubSub {
                     Logger.getGlobal().severe("Game is null !");
                     return;
                 }
-                
+
                 if (requiredSlots > gameMap.getMaxPlayers()) {
                     RedisDataSender.getPublisher.publish("say#" + player + "#§cVotre groupe contient trop de joueurs pour ce mode de jeu.");
                     return;
                 }
-                
+
                 RedisDataSender.getPublisher.publish("queuejoinedmsg#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()));
 
                 Game game = Main.findGame(gameMap.getGameOption(), gameMap.getGameType());
