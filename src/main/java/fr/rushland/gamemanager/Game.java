@@ -1,6 +1,7 @@
 package fr.rushland.gamemanager;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 import fr.rushland.gamemanager.redis.RedisDataSender;
@@ -101,7 +102,8 @@ public class Game {
         if (hasWaitingGames()) {
             System.out.println("GameForFindGame: " + gameType);
             System.out.println("OptionForFindGame: " + option);
-            for (int port : waitingGames) {
+            for (final Iterator<Integer> iterator = waitingGames.iterator(); iterator.hasNext(); ) {
+                int port = iterator.next();
                 String serverName = gameType + port;
                 System.out.println("Game: " + serverName);
 
