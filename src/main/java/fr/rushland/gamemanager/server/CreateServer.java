@@ -138,7 +138,7 @@ public class CreateServer {
             BufferedWriter bf = new BufferedWriter(fw);
             bf.write("id: " + this.port);
             bf.newLine();
-            System.out.println("teams: " + this.option.withTeam());
+            Main.logInfo(prefix + "teams: " + this.option.withTeam());
             if (!game.getGameType().equals("antwars"))
                 bf.write("teams: " + this.option.withTeam());
             else
@@ -240,7 +240,7 @@ public class CreateServer {
 
     public void copySh() {
         try {
-            Logger.getGlobal().info(prefix + "Creating a fresh game...");
+            Main.logInfo(prefix + "Creating a fresh game...");
             FileUtils.copyFile(new File("run.sh"), new File(serverName + ".sh"));
         } catch (IOException e) {
             e.printStackTrace();

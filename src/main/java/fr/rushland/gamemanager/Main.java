@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Scanner;
 import java.util.logging.Logger;
 
 import fr.rushland.gamemanager.redis.RedisDataSender;
@@ -33,6 +34,50 @@ public class Main {
         RedisDataSender.setup("gamemanager");
 
         Main.logSuccess("GameManager Ready! Waiting for data...");
+        
+        @SuppressWarnings("resource")
+        final Scanner scanner = new Scanner(System.in);
+        new Thread() {
+            public void run() {
+                while (true) {
+                    String next = scanner.next();
+                    if (next.equalsIgnoreCase("debug:listGames")) {
+                        synchronized (listGames) {
+                            List<Game> listGamesCopy = new ArrayList<Game>(listGames);
+                            Iterator<Game> iter = listGamesCopy.iterator();
+                            String games = "";
+                            while (iter.hasNext()) {
+                                Game game = iter.next();
+                                games = game.toString() + ", ";
+                            }
+                            Main.logDebug("[listGames] " + games);
+                        }
+                    } else if (next.equalsIgnoreCase("debug:freePort")) {
+                        synchronized (freePort) {
+                            List<Integer> freePortCopy = new ArrayList<Integer>(freePort);
+                            Iterator<Integer> iter = freePortCopy.iterator();
+                            String ports = "";
+                            while (iter.hasNext()) {
+                                int port = iter.next();
+                                ports = port + ", ";
+                            }
+                            Main.logDebug("[freePort] " + ports);
+                        }
+                    } else if (next.equalsIgnoreCase("debug:listOption")) {
+                        synchronized (listOption) {
+                            List<GameMapOption> listOptionCopy = new ArrayList<GameMapOption>(listOption);
+                            Iterator<GameMapOption> iter = listOptionCopy.iterator();
+                            String options = "";
+                            while (iter.hasNext()) {
+                                GameMapOption option = iter.next();
+                                options = option + ", ";
+                            }
+                            Main.logDebug("[listOption] " + options);
+                        }
+                    }
+                }
+            }
+        }.start();
     }
 
     public static Game findGame(String option, String gameType) {
@@ -108,7 +153,11 @@ public class Main {
     }
     
     public static void logError(String msg) {
-        System.out.println((char)27 + "[31m" + msg +  (char)27 + "[0m");
+        System.out.println((char)27 + "[31;1m" + msg +  (char)27 + "[0m");
+    }
+    
+    public static void logDebug(String msg) {
+        System.out.println((char)27 + "[35m" + msg +  (char)27 + "[0m");
     }
 
 }

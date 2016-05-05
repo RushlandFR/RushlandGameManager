@@ -381,13 +381,13 @@ public class Game {
      */
     private void cooldownGameCreated() {
         if (gameRecentlyCreated) {
-            System.out.println("Game " + option + " recently created, wait few seconds");
+            Main.logInfo("[Game] GameType " + gameType + " " + option + " recently created, wait a few seconds...");
             new java.util.Timer().schedule(
                     new java.util.TimerTask() {
                         @Override
                         public void run() {
                             gameRecentlyCreated = false;
-                            System.out.println("Game " + option + " can create game");
+                            Main.logSuccess("[Game] GameType " + gameType + " " + option + " can now create game");
 
                         }
                     },
