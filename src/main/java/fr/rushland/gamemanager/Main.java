@@ -27,14 +27,12 @@ public class Main {
     public static int port = 41000;
 
     public static void main(String[] args) {
-        Logger.getGlobal().info("Starting RushlandGameManager program...");
+        Main.logInfo("Starting GameManager...");
 
-        Logger.getGlobal().info("Setup redis...");
+        Main.logInfo("Connecting to Redis...");
         RedisDataSender.setup("gamemanager");
 
-
-        Logger.getGlobal().info("Ready ! Waiting data...");
-
+        Main.logSuccess("GameManager Ready! Waiting for data...");
     }
 
     public static Game findGame(String option, String gameType) {
