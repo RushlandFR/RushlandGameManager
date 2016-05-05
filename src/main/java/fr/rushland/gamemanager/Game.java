@@ -61,7 +61,7 @@ public class Game {
      * @param port Le port de la partie que l'on ne veut pas
      * @return null si il n'y a pas d'autre partie
      */
-    public String getRandomWaitingGameExcept(int... port) {
+    public synchronized String getRandomWaitingGameExcept(int... port) {
         if (waitingGames.size() != 1) {
             synchronized (waitingGames) {
                 Iterator<Integer> iter = waitingGames.iterator();
@@ -87,7 +87,7 @@ public class Game {
      * @return null si il n'y a pas d'autre partie
      */
     @Deprecated
-    public String getRandomWaitingGameExcept(String game) {
+    public synchronized String getRandomWaitingGameExcept(String game) {
         if (waitingGames.size() != 1) {
             synchronized (waitingGames) {
                 Iterator<Integer> iter = waitingGames.iterator();
@@ -109,7 +109,7 @@ public class Game {
      *
      * @return Renvoie une partie valide
      */
-    public String findValidGame(final int requiredSlots) {
+    public synchronized String findValidGame(final int requiredSlots) {
         if (hasWaitingGames()) {
             System.out.println("GameForFindGame: " + gameType);
             System.out.println("OptionForFindGame: " + option);
@@ -196,7 +196,7 @@ public class Game {
      *
      * @return boolean si il y a des parties de libre
      */
-    public boolean hasWaitingGames() {
+    public synchronized boolean hasWaitingGames() {
         if (waitingGames.size() != 0)
             return true;
         return false;
@@ -208,7 +208,7 @@ public class Game {
      *
      * @return une partie
      */
-    public String getRandomWaitingGame() {
+    public synchronized String getRandomWaitingGame() {
         if (hasWaitingGames()) {
             synchronized (waitingGames) {
                 Iterator<Integer> iter = waitingGames.iterator();
@@ -224,7 +224,7 @@ public class Game {
      * @param port Le port de la partie
      * @return gameType + port
      */
-    public String getGame(int port) {
+    public synchronized String getGame(int port) {
         if (gameExist(port))
             return gameType + port;
         return null;
@@ -237,7 +237,7 @@ public class Game {
      * @param port Le port de la partie
      * @return boolean si la partie existe
      */
-    public boolean gameExist(int port) {
+    public synchronized boolean gameExist(int port) {
         return waitingGames.contains(port) || startedGames.contains(port);
     }
 
@@ -247,7 +247,7 @@ public class Game {
      * @param port Le port de la partie
      * @return boolean si la partie est en attente
      */
-    public boolean isWaitingGame(int port) {
+    public synchronized boolean isWaitingGame(int port) {
         if (gameExist(port))
             if (waitingGames.contains(port))
                 return true;
@@ -279,7 +279,7 @@ public class Game {
     /**
      * @param port Le port de la partie en attente
      */
-    public void addWaitingGame(int port) {
+    public synchronized void addWaitingGame(int port) {
         this.waitingGames.add(port);
     }
 
@@ -288,7 +288,7 @@ public class Game {
      *
      * @param port Le port de la partie lancée
      */
-    public void addStartedGame(int port) {
+    public synchronized void addStartedGame(int port) {
         if (waitingGames.contains(port))
             waitingGames.remove((Object) port);
         this.startedGames.add(port);
@@ -300,7 +300,7 @@ public class Game {
      *
      * @param port Le port de la partie à supprimé
      */
-    public void removeStartedGame(int port) {
+    public synchronized void removeStartedGame(int port) {
         if (waitingGames.contains(port))
             this.waitingGames.remove((Object) port);
         // this.waitingGames.remove(Arrays.asList(port));
