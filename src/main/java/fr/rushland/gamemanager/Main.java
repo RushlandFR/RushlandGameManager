@@ -1,7 +1,9 @@
 package fr.rushland.gamemanager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Logger;
 
 import fr.rushland.gamemanager.redis.RedisDataSender;
@@ -12,14 +14,16 @@ import fr.rushland.gamemanager.redis.RedisDataSender;
 public class Main {
 
 
-    public static ArrayList<Game> listGames = new ArrayList<Game>();
+    /*public static ArrayList<Game> listGames = new ArrayList<Game>();
     public static ArrayList<Integer> freePort = new ArrayList<Integer>();
-    public static ArrayList<GameMapOption> listOption = new ArrayList<>();
+    public static ArrayList<GameMapOption> listOption = new ArrayList<>();*/
+    public static List<Game> listGames = Collections.synchronizedList(new ArrayList<Game>());
+    public static List<Integer> freePort = Collections.synchronizedList(new ArrayList<Integer>());
+    public static List<GameMapOption> listOption = Collections.synchronizedList(new ArrayList<GameMapOption>());
     public static ArrayList<String> partyMembers = new ArrayList<String>();
     public static HashMap<String, Integer> partySlotsByLeader = new HashMap<String, Integer>();
 
     public static int port = 41000;
-
 
     public static void main(String[] args) {
         Logger.getGlobal().info("Starting RushlandGameManager program...");

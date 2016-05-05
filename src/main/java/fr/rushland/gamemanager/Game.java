@@ -1,7 +1,9 @@
 package fr.rushland.gamemanager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Logger;
 
 import fr.rushland.gamemanager.redis.RedisDataSender;
@@ -32,12 +34,14 @@ public class Game {
     /**
      * Les ports des parties non lancées
      */
-    private ArrayList<Integer> waitingGames = new ArrayList<Integer>();
+    //private ArrayList<Integer> waitingGames = new ArrayList<Integer>();
+    private List<Integer> waitingGames = Collections.synchronizedList(new ArrayList<Integer>());
 
     /**
      * Les ports des parties lancées
      */
-    private ArrayList<Integer> startedGames = new ArrayList<Integer>();
+    //private ArrayList<Integer> startedGames = new ArrayList<Integer>();
+    private List<Integer> startedGames = Collections.synchronizedList(new ArrayList<Integer>());
 
     private int maxPlayers;
 
@@ -51,7 +55,6 @@ public class Game {
         this.maxPlayers = maxPlayers;
         this.option = option;
         Main.listGames.add(this);
-
     }
 
     /**
@@ -60,16 +63,20 @@ public class Game {
      */
     public String getRandomWaitingGameExcept(int... port) {
         if (waitingGames.size() != 1) {
-            for (int gamePort : waitingGames) {
-                boolean validGame = true;
-                for (int gport : port) {
-                    if (gport == gamePort) {
-                        validGame = false;
+            synchronized (waitingGames) {
+                Iterator<Integer> iter = waitingGames.iterator();
+                while (iter.hasNext()) {
+                    int gamePort = iter.next();
+                    boolean validGame = true;
+                    for (int gport : port) {
+                        if (gport == gamePort) {
+                            validGame = false;
+                        }
                     }
-                }
-                if (validGame)
-                    return getGame(gamePort);
+                    if (validGame)
+                        return getGame(gamePort);
 
+                }
             }
         }
         return null;
@@ -82,9 +89,13 @@ public class Game {
     @Deprecated
     public String getRandomWaitingGameExcept(String game) {
         if (waitingGames.size() != 1) {
-            for (int gamePort : waitingGames) {
-                if ((gameType + gamePort) != game) {
-                    return getGame(gamePort);
+            synchronized (waitingGames) {
+                Iterator<Integer> iter = waitingGames.iterator();
+                while (iter.hasNext()) {
+                    int gamePort = iter.next();
+                    if ((gameType + gamePort) != game) {
+                        return getGame(gamePort);
+                    }
                 }
             }
         }
@@ -102,39 +113,43 @@ public class Game {
         if (hasWaitingGames()) {
             System.out.println("GameForFindGame: " + gameType);
             System.out.println("OptionForFindGame: " + option);
-            for (final Iterator<Integer> iterator = waitingGames.iterator(); iterator.hasNext(); ) {
-                int port = iterator.next();
-                String serverName = gameType + port;
-                System.out.println("Game: " + serverName);
 
-                RedisRequestData data = new RedisRequestHandler(serverName).getData();
-                if (data == null) {
-                    Logger.getGlobal().severe("\nError during receiving information about : " + serverName);
-                    Logger.getGlobal().severe("\nTrying seconde time to : " + serverName);
-                    RedisRequestData data2 = new RedisRequestHandler(serverName).getData();
-                    if (data2 == null) {
-                        Logger.getGlobal().severe("\nSecond ping didn't work delete server : " + serverName);
-                        RedisDataSender.getPublisher.publish("delete#" + gameType + "#" + port);
-                        break;
-                    } else {
-                        Logger.getGlobal().severe("\nReceived information with second ping ! : " + serverName);
-                        data = data2;
-                    }
+            synchronized (waitingGames) {
+                Iterator<Integer> iter = waitingGames.iterator();
+                while (iter.hasNext()) {
+                    int port = iter.next();
+                    String serverName = gameType + port;
+                    System.out.println("Game: " + serverName);
 
-                }
-                System.out.println("data '" + data.getMotd() + "'"); //TODO
-                if (data.getMotd().equalsIgnoreCase("§2Ouvert")) {
-                    int freeSlots = data.getMaxPlayers() - data.getOnlinePlayers();
-                    if (freeSlots >= requiredSlots) {
-                        return serverName;
+                    RedisRequestData data = new RedisRequestHandler(serverName).getData();
+                    if (data == null) {
+                        Logger.getGlobal().severe("\nError during receiving information about : " + serverName);
+                        Logger.getGlobal().severe("\nTrying seconde time to : " + serverName);
+                        RedisRequestData data2 = new RedisRequestHandler(serverName).getData();
+                        if (data2 == null) {
+                            Logger.getGlobal().severe("\nSecond ping didn't work delete server : " + serverName);
+                            RedisDataSender.getPublisher.publish("delete#" + gameType + "#" + port);
+                            break;
+                        } else {
+                            Logger.getGlobal().severe("\nReceived information with second ping ! : " + serverName);
+                            data = data2;
+                        }
+
                     }
-                } else if (data.getMotd().equals("§cEn jeu")) {
-                    addStartedGame(port);
-                } else if (data.getMotd().equals("§l§cFermé")) {
-                    addStartedGame(data.getPort());
-                    removeStartedGame(data.getPort());
-                } else if (data.getMotd().equals("§cFin de partie...")) {
-                    removeStartedGame(data.getPort());
+                    System.out.println("data '" + data.getMotd() + "'"); //TODO
+                    if (data.getMotd().equalsIgnoreCase("§2Ouvert")) {
+                        int freeSlots = data.getMaxPlayers() - data.getOnlinePlayers();
+                        if (freeSlots >= requiredSlots) {
+                            return serverName;
+                        }
+                    } else if (data.getMotd().equals("§cEn jeu")) {
+                        addStartedGame(port);
+                    } else if (data.getMotd().equals("§l§cFermé")) {
+                        addStartedGame(data.getPort());
+                        removeStartedGame(data.getPort());
+                    } else if (data.getMotd().equals("§cFin de partie...")) {
+                        removeStartedGame(data.getPort());
+                    }
                 }
             }
         }
@@ -143,17 +158,21 @@ public class Game {
 
     public RedisRequestData findBetterGame(int requiredSlots) {
         RedisRequestData bestServer = null;
-        for (int waitingGame : waitingGames) {
-            RedisRequestData data = pingServer(gameType + waitingGame);
-            if (data == null) break;
-            if (data.getMotd().equalsIgnoreCase("§2Ouvert")) {
-                int freeSlots = data.getMaxPlayers() - data.getOnlinePlayers();
-                if (freeSlots >= requiredSlots) {
-                    if (bestServer == null) {
-                        bestServer = data;
-                    } else {
-                        if (bestServer.getOnlinePlayers() < data.getOnlinePlayers()) {
+        synchronized (waitingGames) {
+            Iterator<Integer> iter = waitingGames.iterator();
+            while (iter.hasNext()) {
+                int waitingGame = iter.next();
+                RedisRequestData data = pingServer(gameType + waitingGame);
+                if (data == null) break;
+                if (data.getMotd().equalsIgnoreCase("§2Ouvert")) {
+                    int freeSlots = data.getMaxPlayers() - data.getOnlinePlayers();
+                    if (freeSlots >= requiredSlots) {
+                        if (bestServer == null) {
                             bestServer = data;
+                        } else {
+                            if (bestServer.getOnlinePlayers() < data.getOnlinePlayers()) {
+                                bestServer = data;
+                            }
                         }
                     }
                 }
@@ -191,7 +210,10 @@ public class Game {
      */
     public String getRandomWaitingGame() {
         if (hasWaitingGames()) {
-            return getGame(waitingGames.iterator().next());
+            synchronized (waitingGames) {
+                Iterator<Integer> iter = waitingGames.iterator();
+                return getGame(iter.next());
+            }
         }
         return null;
     }
@@ -243,14 +265,14 @@ public class Game {
     /**
      * @return Les ports des parties non lancées
      */
-    public ArrayList<Integer> getWaitingGamesPort() {
+    public List<Integer> getWaitingGamesPort() {
         return this.waitingGames;
     }
 
     /**
      * @return Les ports des parties lancées
      */
-    public ArrayList<Integer> getStartedGamesGamesPort() {
+    public List<Integer> getStartedGamesGamesPort() {
         return this.startedGames;
     }
 
