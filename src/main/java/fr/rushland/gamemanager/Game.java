@@ -145,11 +145,11 @@ public class Game {
                         }
                     } else if (data.getMotd().equals("§cEn jeu")) {
                         addStartedGame(port);
-                    } else if (data.getMotd().equals("§l§cFermé")) {
+                    } else if (data.getMotd().equals("§c§lFermé")) {
                         addStartedGame(data.getPort());
-                        removeStartedGame(data.getPort(), true);
+                        removeStartedGame(data.getPort());
                     } else if (data.getMotd().equals("§cFin de partie...")) {
-                        removeStartedGame(data.getPort(), true);
+                        removeStartedGame(data.getPort(), 15);
                     }
                 }
             }
@@ -301,7 +301,7 @@ public class Game {
      *
      * @param port Le port de la partie à supprimé
      */
-    public synchronized void removeStartedGame(int port, boolean delete) {
+    public synchronized void removeStartedGame(int port) {
         if (waitingGames.contains(port))
             this.waitingGames.remove((Object) port);
         // this.waitingGames.remove(Arrays.asList(port));
@@ -310,9 +310,35 @@ public class Game {
         // this.startedGames.remove(Arrays.asList(port));
         if (!Main.freePort.contains(port))
             Main.freePort.add(port);
-        if (delete) {
-            RedisDataSender.getPublisher.publish("delete#" + gameType + "#" + port);
-        }
+
+        RedisDataSender.getPublisher.publish("delete#" + gameType + "#" + port);
+    }
+
+    /**
+     * On ajoute le port dans la liste des ports disponible
+     *
+     * @param port Le port de la partie à supprimé
+     * @param delay Delai avant suppression en secondes
+     */
+    public synchronized void removeStartedGame(int port, int delay) {
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        if (waitingGames.contains(port))
+                            waitingGames.remove((Object) port);
+                        // this.waitingGames.remove(Arrays.asList(port));
+                        if (startedGames.contains(port))
+                            startedGames.remove((Object) port);
+                        // this.startedGames.remove(Arrays.asList(port));
+                        if (!Main.freePort.contains(port))
+                            Main.freePort.add(port);
+
+                        RedisDataSender.getPublisher.publish("delete#" + gameType + "#" + port);
+                    }
+                },
+                delay * 1000
+                );
     }
 
     /**
