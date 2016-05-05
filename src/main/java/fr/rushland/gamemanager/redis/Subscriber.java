@@ -199,14 +199,12 @@ public class Subscriber extends JedisPubSub {
                 System.out.println("Port: " + port);
                 final CreateServer newSrv = new CreateServer(game, gameMap, port);
                 newSrv.copyGameServer();
-
+                RedisDataSender.getPublisher.publish("createsrv#" + finalGame.getGameType() + "#" + finalPort + "#" + player);
                 new java.util.Timer().schedule(
                         new java.util.TimerTask() {
                             @Override
                             public void run() {
-                                RedisDataSender.getPublisher.publish("createsrv#" + finalGame.getGameType() + "#" + finalPort + "#" + player);
                                 newSrv.runServer();
-
                             }
                         },
                         2000
