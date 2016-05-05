@@ -110,7 +110,7 @@ public class Subscriber extends JedisPubSub {
                     Logger.getGlobal().severe("\nGame '" + typeGame + port + "' is null !");
                     return;
                 }
-
+                RedisDataSender.getPublisher.publish("removesrv#" + typeGame + "#" + port);
                 System.out.println("Option de la game a supprimer: " + game.getOption());
                 if (new File(game.getGame(port)).exists()) {
                     try {
