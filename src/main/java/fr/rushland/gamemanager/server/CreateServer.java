@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 
 import fr.rushland.gamemanager.Game;
 import fr.rushland.gamemanager.GameMapOption;
+import fr.rushland.gamemanager.Main;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -71,7 +72,7 @@ public class CreateServer {
     public void copyGameServer() {
         if (new File(getGameDirectory()).exists()) {
             try {
-                Logger.getGlobal().info(prefix + "Previous game found, deleting it...");
+                Main.logInfo(prefix + "Previous game found, deleting it...");
                 FileUtils.deleteDirectory(new File(getGameDirectory()));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -79,7 +80,7 @@ public class CreateServer {
         }
 
         try {
-            Logger.getGlobal().info(prefix + "Creating a fresh game...");
+            Main.logInfo(prefix + "Creating a fresh game...");
             FileUtils.copyDirectory(new File(getOriginalGame()), new File(getGameDirectory()));
         } catch (IOException e) {
             e.printStackTrace();
@@ -125,7 +126,7 @@ public class CreateServer {
         String path = getGameDirectory() + "/plugins/" + filePluginPath;
         if (new File(path + "/config.yml").exists()) {
             try {
-                Logger.getGlobal().info(prefix + "Deleting previous yaml config plugin");
+                Main.logInfo(prefix + "Deleting previous yaml config plugin");
                 FileUtils.forceDelete(new File(path + "/config.yml"));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -184,14 +185,14 @@ public class CreateServer {
             e.printStackTrace();
         }
         modifySh();
-        Logger.getGlobal().info(prefix + "Server ready ! ");
+        Main.logSuccess(prefix + "Server ready !");
 
     }
 
     public void runServer() {
         copySh();
         try {
-            Logger.getGlobal().info("Starting server " + serverName);
+            Main.logInfo(prefix + "Starting server");
       /*      CommandLine commandLine = CommandLine.parse("sh " + getGameDirectory() + "/run.sh");
             DefaultExecutor exec = new DefaultExecutor();
             exec.setExitValue(0);
@@ -232,10 +233,9 @@ public class CreateServer {
                     4000
             );
         } catch (Exception e) {
-            Logger.getGlobal().log(Level.SEVERE, prefix + "Error during starting server", e);
+            Main.logError("[runServer] " + prefix + "Error during starting server");
+            e.printStackTrace();
         }
-
-
     }
 
     public void copySh() {

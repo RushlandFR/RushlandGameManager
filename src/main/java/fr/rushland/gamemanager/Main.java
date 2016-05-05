@@ -39,7 +39,8 @@ public class Main {
 
     public static Game findGame(String option, String gameType) {
         synchronized (listGames) {
-            Iterator<Game> iter = listGames.iterator();
+            List<Game> listGamesCopy = new ArrayList<Game>(listGames);
+            Iterator<Game> iter = listGamesCopy.iterator();
             while (iter.hasNext()) {
                 Game game = iter.next();
                 if (option.equals(game.getOption()) && gameType.equals(game.getGameType())) {
@@ -55,7 +56,8 @@ public class Main {
 
     public static GameMapOption getOptionByName(String option, String type) {
         synchronized (listOption) {
-            Iterator<GameMapOption> iter = listOption.iterator();
+            List<GameMapOption> listOptionCopy = new ArrayList<GameMapOption>(listOption);
+            Iterator<GameMapOption> iter = listOptionCopy.iterator();
             while (iter.hasNext()) {
                 GameMapOption gameMap = iter.next();
                 if (gameMap.getGameType().equals(type) && gameMap.getGameOption().equals(option)) {
@@ -65,10 +67,12 @@ public class Main {
         }
         return null;
     }
+    
     public static ArrayList<Game> findGame(String gameType) {
         ArrayList<Game> games = new ArrayList<>();
         synchronized (listGames) {
-            Iterator<Game> iter = listGames.iterator();
+            List<Game> listGamesCopy = new ArrayList<Game>(listGames);
+            Iterator<Game> iter = listGamesCopy.iterator();
             while (iter.hasNext()) {
                 Game game = iter.next();
                 if (game.getGameType().equals(gameType)) {
@@ -81,7 +85,8 @@ public class Main {
 
     public static Game findGame(int port) {
         synchronized (listGames) {
-            Iterator<Game> iter = listGames.iterator();
+            List<Game> listGamesCopy = new ArrayList<Game>(listGames);
+            Iterator<Game> iter = listGamesCopy.iterator();
             while (iter.hasNext()) {
                 Game game = iter.next();
                 if (game.gameExist(port)) {
@@ -90,6 +95,22 @@ public class Main {
             }
         }
         return null;
+    }
+    
+    public static void logInfo(String msg) {
+        System.out.println((char)27 + "[36m" + msg +  (char)27 + "[0m");
+    }
+    
+    public static void logSuccess(String msg) {
+        System.out.println((char)27 + "[32m" + msg +  (char)27 + "[0m");
+    }
+    
+    public static void logWarning(String msg) {
+        System.out.println((char)27 + "[33m" + msg +  (char)27 + "[0m");
+    }
+    
+    public static void logError(String msg) {
+        System.out.println((char)27 + "[31m" + msg +  (char)27 + "[0m");
     }
 
 }

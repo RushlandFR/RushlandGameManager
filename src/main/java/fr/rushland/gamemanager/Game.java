@@ -111,8 +111,8 @@ public class Game {
      */
     public synchronized String findValidGame(final int requiredSlots) {
         if (hasWaitingGames()) {
-            System.out.println("GameForFindGame: " + gameType);
-            System.out.println("OptionForFindGame: " + option);
+            Main.logInfo("[findValidGame] GameType to search: " + gameType);
+            Main.logInfo("[findValidGame] Option to search: " + option);
 
             synchronized (waitingGames) {
                 List<Integer> waitingGamesCopy = new ArrayList<Integer>(waitingGames);
@@ -120,36 +120,40 @@ public class Game {
                 while (iter.hasNext()) {
                     int port = iter.next();
                     String serverName = gameType + port;
-                    System.out.println("Game: " + serverName);
+                    Main.logSuccess("[findValidGame] Game found: " + serverName);
 
                     RedisRequestData data = new RedisRequestHandler(serverName).getData();
                     if (data == null) {
-                        Logger.getGlobal().severe("\nError during receiving information about : " + serverName);
-                        Logger.getGlobal().severe("\nTrying seconde time to : " + serverName);
+                        Main.logError("[findValidGame] Error during request for : " + serverName);
+                        Main.logError("[findValidGame] Trying second time for : " + serverName);
                         RedisRequestData data2 = new RedisRequestHandler(serverName).getData();
                         if (data2 == null) {
-                            Logger.getGlobal().severe("\nSecond ping didn't work delete server : " + serverName);
+                            Main.logError("[findValidGame] Still no data, deleting game : " + serverName);
                             RedisDataSender.getPublisher.publish("delete#" + gameType + "#" + port);
                             break;
                         } else {
-                            Logger.getGlobal().severe("\nReceived information with second ping ! : " + serverName);
+                            Main.logSuccess("[findValidGame] Received information with second ping for " + serverName);
                             data = data2;
                         }
 
                     }
-                    System.out.println("data '" + data.getMotd() + "'"); //TODO
+                    Main.logInfo("[findValidGame] Game motd: '" + data.getMotd() + "'"); //TODO
                     if (data.getMotd().equalsIgnoreCase("§2Ouvert")) {
+                        Main.logSuccess("[findValidGame] Game is open, returning it");
                         int freeSlots = data.getMaxPlayers() - data.getOnlinePlayers();
                         if (freeSlots >= requiredSlots) {
                             return serverName;
                         }
                     } else if (data.getMotd().equals("§cEn jeu")) {
+                        Main.logError("[findValidGame] Game is in progress, adding it to started list");
                         addStartedGame(port);
                     } else if (data.getMotd().equals("§c§lFermé")) {
+                        Main.logError("[findValidGame] Game is closed, adding it to started list");
                         addStartedGame(data.getPort());
-                        removeStartedGame(data.getPort());
+                        removeStartedGame(data.getPort(), true);
                     } else if (data.getMotd().equals("§cFin de partie...")) {
-                        removeStartedGame(data.getPort(), 15);
+                        Main.logError("[findValidGame] Game is finished, adding it to started list in 15 seconds");
+                        removeStartedGame(data.getPort(), true, 15);
                     }
                 }
             }
@@ -160,7 +164,8 @@ public class Game {
     public RedisRequestData findBetterGame(int requiredSlots) {
         RedisRequestData bestServer = null;
         synchronized (waitingGames) {
-            Iterator<Integer> iter = waitingGames.iterator();
+            List<Integer> waitingGamesCopy = new ArrayList<Integer>(waitingGames);
+            Iterator<Integer> iter = waitingGamesCopy.iterator();
             while (iter.hasNext()) {
                 int waitingGame = iter.next();
                 RedisRequestData data = pingServer(gameType + waitingGame);
@@ -300,8 +305,9 @@ public class Game {
      * On ajoute le port dans la liste des ports disponible
      *
      * @param port Le port de la partie à supprimé
+     * @param deleteInProxy Supprimer le serveur des proxy
      */
-    public synchronized void removeStartedGame(int port) {
+    public synchronized void removeStartedGame(int port, boolean deleteInProxy) {
         if (waitingGames.contains(port))
             this.waitingGames.remove((Object) port);
         // this.waitingGames.remove(Arrays.asList(port));
@@ -311,30 +317,24 @@ public class Game {
         if (!Main.freePort.contains(port))
             Main.freePort.add(port);
 
-        RedisDataSender.getPublisher.publish("delete#" + gameType + "#" + port);
+        if (deleteInProxy) {
+            RedisDataSender.getPublisher.publish("removesrv#" + gameType + "#" + port);
+        }
     }
 
     /**
      * On ajoute le port dans la liste des ports disponible
      *
      * @param port Le port de la partie à supprimé
+     * @param deleteInProxy Supprimer le serveur des proxy
      * @param delay Delai avant suppression en secondes
      */
-    public synchronized void removeStartedGame(int port, int delay) {
+    public synchronized void removeStartedGame(int port, boolean deleteInProxy, int delay) {
         new java.util.Timer().schedule(
                 new java.util.TimerTask() {
                     @Override
                     public void run() {
-                        if (waitingGames.contains(port))
-                            waitingGames.remove((Object) port);
-                        // this.waitingGames.remove(Arrays.asList(port));
-                        if (startedGames.contains(port))
-                            startedGames.remove((Object) port);
-                        // this.startedGames.remove(Arrays.asList(port));
-                        if (!Main.freePort.contains(port))
-                            Main.freePort.add(port);
-
-                        RedisDataSender.getPublisher.publish("delete#" + gameType + "#" + port);
+                        removeStartedGame(port, deleteInProxy);
                     }
                 },
                 delay * 1000
