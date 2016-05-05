@@ -6,6 +6,8 @@ import redis.clients.jedis.Jedis;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import fr.rushland.gamemanager.Main;
+
 public class RedisDataSender {
 
     public static String serverId;
@@ -46,11 +48,12 @@ public class RedisDataSender {
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    Logger.getGlobal().info("Subscribing to '" + channelSub + "' & 'RLGamePS' channel");
+                    Main.logInfo("[RedisDataSender] Subscribing to '" + channelSub + "' & 'RLGamePS' channel");
                     subscriberJedis.subscribe(subscriber, channelSub, "RLGamePS");
-                    Logger.getGlobal().info("Subscription ended.");
+                    Main.logError("[RedisDataSender] Subscription ended.");
                 } catch (Exception e) {
-                    Logger.getGlobal().log(Level.SEVERE, "Subscribing failed", e );
+                    Main.logError("[RedisDataSender] Subscribing failed");
+                    e.printStackTrace();
                 }
 
             }
