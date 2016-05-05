@@ -119,7 +119,7 @@ public class Subscriber extends JedisPubSub {
                         e.printStackTrace();
                     }
                 }
-                game.removeStartedGame(port);
+                game.removeStartedGame(port, true);
             } else if (msg[0].equals("random")) {
                 String playerName = msg[1];
                 if (Main.partyMembers.contains(playerName)) {

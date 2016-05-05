@@ -115,7 +115,8 @@ public class Game {
             System.out.println("OptionForFindGame: " + option);
 
             synchronized (waitingGames) {
-                Iterator<Integer> iter = waitingGames.iterator();
+                List<Integer> waitingGamesCopy = new ArrayList<Integer>(waitingGames);
+                Iterator<Integer> iter = waitingGamesCopy.iterator();
                 while (iter.hasNext()) {
                     int port = iter.next();
                     String serverName = gameType + port;
@@ -146,9 +147,9 @@ public class Game {
                         addStartedGame(port);
                     } else if (data.getMotd().equals("§l§cFermé")) {
                         addStartedGame(data.getPort());
-                        removeStartedGame(data.getPort());
+                        removeStartedGame(data.getPort(), true);
                     } else if (data.getMotd().equals("§cFin de partie...")) {
-                        removeStartedGame(data.getPort());
+                        removeStartedGame(data.getPort(), true);
                     }
                 }
             }
@@ -300,7 +301,7 @@ public class Game {
      *
      * @param port Le port de la partie à supprimé
      */
-    public synchronized void removeStartedGame(int port) {
+    public synchronized void removeStartedGame(int port, boolean delete) {
         if (waitingGames.contains(port))
             this.waitingGames.remove((Object) port);
         // this.waitingGames.remove(Arrays.asList(port));
@@ -309,8 +310,9 @@ public class Game {
         // this.startedGames.remove(Arrays.asList(port));
         if (!Main.freePort.contains(port))
             Main.freePort.add(port);
-        RedisDataSender.getPublisher.publish("delete#" + gameType + "#" + port);
-
+        if (delete) {
+            RedisDataSender.getPublisher.publish("delete#" + gameType + "#" + port);
+        }
     }
 
     /**
