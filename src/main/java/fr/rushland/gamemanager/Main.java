@@ -3,6 +3,7 @@ package fr.rushland.gamemanager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -53,9 +54,13 @@ public class Main {
 
 
     public static GameMapOption getOptionByName(String option, String type) {
-        for (GameMapOption gameMap : listOption) {
-            if (gameMap.getGameType().equals(type) && gameMap.getGameOption().equals(option)) {
-                return gameMap;
+        synchronized (listOption) {
+            Iterator<GameMapOption> iter = listOption.iterator();
+            while (iter.hasNext()) {
+                GameMapOption gameMap = iter.next();
+                if (gameMap.getGameType().equals(type) && gameMap.getGameOption().equals(option)) {
+                    return gameMap;
+                }
             }
         }
         return null;
