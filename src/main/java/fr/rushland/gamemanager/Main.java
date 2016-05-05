@@ -37,12 +37,16 @@ public class Main {
     }
 
     public static Game findGame(String option, String gameType) {
-        for (Game game : listGames) {
-            if (option.equals(game.getOption()) && gameType.equals(game.getGameType())) {
-                return game;
-            } /*else if (option.equals( game.getGameType())) {
-                return game;
-            }*/
+        synchronized (listGames) {
+            Iterator<Game> iter = listGames.iterator();
+            while (iter.hasNext()) {
+                Game game = iter.next();
+                if (option.equals(game.getOption()) && gameType.equals(game.getGameType())) {
+                    return game;
+                } /*else if (option.equals( game.getGameType())) {
+                    return game;
+                }*/
+            }
         }
         return null;
     }
@@ -58,18 +62,26 @@ public class Main {
     }
     public static ArrayList<Game> findGame(String gameType) {
         ArrayList<Game> games = new ArrayList<>();
-        for (Game game : listGames) {
-            if (game.getGameType().equals(gameType)) {
-                games.add(game);
+        synchronized (listGames) {
+            Iterator<Game> iter = listGames.iterator();
+            while (iter.hasNext()) {
+                Game game = iter.next();
+                if (game.getGameType().equals(gameType)) {
+                    games.add(game);
+                }
             }
         }
         return games;
     }
 
     public static Game findGame(int port) {
-        for (Game game : listGames) {
-            if (game.gameExist(port)) {
-                return game;
+        synchronized (listGames) {
+            Iterator<Game> iter = listGames.iterator();
+            while (iter.hasNext()) {
+                Game game = iter.next();
+                if (game.gameExist(port)) {
+                    return game;
+                }
             }
         }
         return null;
