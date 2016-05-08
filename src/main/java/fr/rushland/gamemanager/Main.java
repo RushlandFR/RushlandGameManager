@@ -48,7 +48,7 @@ public class Main {
                             String games = "";
                             while (iter.hasNext()) {
                                 Game game = iter.next();
-                                games = game.toString() + ", ";
+                                games = game + ", ";
                             }
                             Main.logDebug("[listGames] " + games);
                         }

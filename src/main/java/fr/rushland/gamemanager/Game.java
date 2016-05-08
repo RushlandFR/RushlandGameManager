@@ -152,6 +152,7 @@ public class Game {
                         addStartedGame(data.getPort());
                         removeStartedGame(data.getPort(), true);
                     } else if (data.getMotd().equals("§cFin de partie...")) {
+                        // La partie envoie déjà son auto supression a l'arret du serveur
                         /*Main.logError("[findValidGame] Game is finished, adding it to started list in 15 seconds");
                         removeStartedGame(data.getPort(), true, 15);*/
                     }
