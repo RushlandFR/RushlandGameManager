@@ -49,6 +49,11 @@ public class Subscriber extends JedisPubSub {
             }
         } else if (channel.equals(RedisDataSender.channelSub)) {
             String[] packet = message.split("#");
+            if (packet[0].equals("cancel")) {
+                final String player = packet[1];
+                GameData.waitingPlayers.remove(player);
+                return;
+            }
             if (!packet[0].equals(GameManager.getInstance().getConfig().getGame())) {
                 return;
             }
