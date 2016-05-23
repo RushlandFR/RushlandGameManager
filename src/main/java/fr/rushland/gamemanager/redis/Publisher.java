@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 
 public class Publisher {
 
-
     private final Jedis publisherJedis;
 
     private final String channel;

@@ -1,9 +1,5 @@
 package fr.rushland.gamemanager.redis;
 
-/**
- *
- * @author Aquazus
- */
 public class RedisRequestData {
 
     private final String serverId;

@@ -2,10 +2,6 @@ package fr.rushland.gamemanager.redis;
 
 import redis.clients.jedis.Jedis;
 
-/**
- *
- * @author Aquazus
- */
 public class RedisRequestHandler {
 
     private final String serverName;

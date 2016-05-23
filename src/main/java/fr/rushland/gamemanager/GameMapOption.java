@@ -1,13 +1,9 @@
 package fr.rushland.gamemanager;
 
-
 import java.util.ArrayList;
 
 import fr.rushland.gamemanager.utils.CodeUtils;
 
-/**
- * Created by Zaral on 11/04/2016.
- */
 public class GameMapOption {
 
     private String gameType;
@@ -17,8 +13,8 @@ public class GameMapOption {
     private boolean team = false;
     private String name;
     private int order;
-
-    public GameMapOption(String gameType, String option, ArrayList<String> listMap, int maxPlayers, String name, boolean team) {
+    
+    public GameMapOption(String gameType, String option, ArrayList<String> listMap, int maxPlayers, String name, boolean team, int order) {
         this.gameType = gameType;
         this.gameOption = option;
         this.listMap = listMap;
@@ -26,8 +22,6 @@ public class GameMapOption {
         this.name = name;
         this.order = order;
         this.team = team;
-        Main.listOption.add(this);
-      //  Main.getInstance().getQueueManager().gameMapOption.add(this);
     }
 
     public String getGameType() {
@@ -50,7 +44,7 @@ public class GameMapOption {
     public String getName() {
         return this.name;
     }
-    
+
     public int getOrder() {
         return this.order;
     }

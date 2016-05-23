@@ -1,58 +1,34 @@
 package fr.rushland.gamemanager.redis;
 
-
 import redis.clients.jedis.Jedis;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import fr.rushland.gamemanager.Main;
+import fr.rushland.gamemanager.Logger;
 
 public class RedisDataSender {
 
     public static String serverId;
-    public static String channelSub = "RLGame";
-    public static Publisher getPublisher = null;
+    public static String channelSub = "RLGameManager";
+    public static Publisher publisher = null;
+    private static Logger logger;
 
     public static void setup(String gameType) {
         serverId = gameType;
         subscribeChannels();
-        //refreshTimer();
+        logger = Logger.getLogger();
     }
-
-    /*	public static void sendData() {
-		String key = "RLSrvData-" + serverId;
-		String value = Variables.motd + "_" + Bukkit.getServer().getOnlinePlayers().size() + "_" + Bukkit.getServer().getMaxPlayers();
-		Jedis jedis = JedisFactory.getInstance().getJedisPool().getResource();
-		jedis.set(key, value);
-		jedis.expire(key, 8);
-		jedis.close();
-	}
-
-	public static void refreshTimer() {
-		Bukkit.getScheduler().runTaskLater(Main.plugin, new Runnable() {
-			@Override
-			public void run() {
-				sendData();
-				refreshTimer();
-			}
-		}, 20L * 4);
-	}
-     */
-
+    
     private static void subscribeChannels() {
         final Jedis subscriberJedis = JedisFactory.getInstance().getJedisPool().getResource();
 
-        final Subscriber subscriber = new Subscriber(); //permet de reçevoir les données
+        final Subscriber subscriber = new Subscriber();
 
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    Main.logInfo("[RedisDataSender] Subscribing to '" + channelSub + "' & 'RLGamePS' channel");
+                    logger.println("[RedisDataSender] Subscribing to '" + channelSub + "' & 'RLGamePS' channel");
                     subscriberJedis.subscribe(subscriber, channelSub, "RLGamePS");
-                    Main.logError("[RedisDataSender] Subscription ended.");
+                    logger.success("[RedisDataSender] Subscription ended.");
                 } catch (Exception e) {
-                    Main.logError("[RedisDataSender] Subscribing failed");
+                    logger.error("[RedisDataSender] Subscribing failed");
                     e.printStackTrace();
                 }
 
@@ -61,7 +37,7 @@ public class RedisDataSender {
 
         final Jedis publisherJedis = JedisFactory.getInstance().getJedisPool().getResource();
 
-        getPublisher = new Publisher(publisherJedis, channelSub);
+        publisher = new Publisher(publisherJedis, channelSub);
 
     }
 }

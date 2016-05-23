@@ -2,40 +2,35 @@ package fr.rushland.gamemanager.redis;
 
 import com.google.gson.Gson;
 
-import fr.rushland.gamemanager.Game;
+import fr.rushland.gamemanager.GameData;
+import fr.rushland.gamemanager.GameManager;
 import fr.rushland.gamemanager.GameMapOption;
-import fr.rushland.gamemanager.Main;
-import fr.rushland.gamemanager.server.CreateServer;
+import fr.rushland.gamemanager.Logger;
 import fr.rushland.gamemanager.utils.CodeUtils;
-
-import org.apache.commons.io.FileUtils;
 import redis.clients.jedis.JedisPubSub;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.logging.Logger;
 
-/**
- * Created by Zaral on 10/04/2016.
- */
 public class Subscriber extends JedisPubSub {
 
     public static HashMap<String, GameMapOption> playerCancelled = new HashMap<>();
+    public static ArrayList<String> partyMembers = new ArrayList<String>();
+    public static HashMap<String, Integer> partySlotsByLeader = new HashMap<String, Integer>();
+    private static Logger logger = Logger.getLogger();
 
     @Override
     public void onMessage(String channel, String message) {
         //Reçois les messages.
         if (channel.equals("RLGamePS")) {
             String[] packet = message.split("#");
-            Main.logInfo("[Subscriber] Received packet '" + message + "' from Proxy");
+            logger.println("[Subscriber] Received packet '" + message + "' from Proxy");
             if (packet[0].equals("members")) {
                 String member = packet[2];
                 if (packet[1].equals("add")) {
-                    Main.partyMembers.add(member);
+                    partyMembers.add(member);
                 } else if (packet[1].equals("remove")) {
-                    Main.partyMembers.remove(member);
+                    partyMembers.remove(member);
                 }
             } else if (packet[0].equals("slots")) {
                 String leader = packet[2];
@@ -44,185 +39,117 @@ public class Subscriber extends JedisPubSub {
                     slots = Integer.parseInt(packet[3]);
                 }
                 if (packet[1].equals("put")) {
-                    Main.partySlotsByLeader.put(leader, slots);
+                    partySlotsByLeader.put(leader, slots);
                 } else if (packet[1].equals("remove")) {
-                    Main.partySlotsByLeader.remove(leader);
+                    partySlotsByLeader.remove(leader);
                 }
             }
         } else if (channel.equals(RedisDataSender.channelSub)) {
-            String[] msg = message.split("#");
-            if (msg[0].equals("init")) {
-                /*           String gameType = msg[1];
-                String option = msg[2];
-                int maxPlayers = Integer.parseInt(msg[3]);
-                String map = msg[4];
-                new GameQueue(gameType, maxPlayers, map, option);
+            String[] packet = message.split("#");
+            if (!packet[0].equals(GameManager.getInstance().getConfig().getGame())) {
                 return;
-                 */
-            } else if (msg[0].equals("findGame")) {
-                final String player = msg[1];
-                if (Main.partyMembers.contains(player)) {
-                    RedisDataSender.getPublisher.publish("say#" + player + "#§cSeul le chef de votre groupe peut rejoindre une file d'attente.");
+            }
+            if (packet[1].equals("findGame")) {
+                final String player = packet[2];
+                if (partyMembers.contains(player)) {
+                    RedisDataSender.publisher.publish("proxy#say#" + player + "#§cSeul le chef de votre groupe peut rejoindre une file d'attente.");
                     return;
                 }
                 int requiredSlots = 1;
-                if (Main.partySlotsByLeader.containsKey(player)) {
-                    requiredSlots = Main.partySlotsByLeader.get(player);
+                if (partySlotsByLeader.containsKey(player)) {
+                    requiredSlots = partySlotsByLeader.get(player);
                 }
-                
-                Main.logInfo("[Subscriber] Received packet 'findGame#" + player + "' from Proxy");
 
-                final String gsonString = msg[2];
+                logger.println("[Subscriber] Received packet 'findGame#" + player + "' from Proxy");
+
+                final String gsonString = packet[3];
 
                 Gson gson = new Gson();
 
-                GameMapOption gameMap = gson.fromJson(gsonString, GameMapOption.class); //Permet de générer la map etc...
+                GameMapOption gameMap = gson.fromJson(gsonString, GameMapOption.class);
 
                 if (gameMap == null) {
-                    Main.logError("[Subscriber] Game is null !");
+                    logger.error("[Subscriber] GameMapOption is null !");
                     return;
                 }
 
                 if (requiredSlots > gameMap.getMaxPlayers()) {
-                    RedisDataSender.getPublisher.publish("say#" + player + "#§cVotre groupe contient trop de joueurs pour ce mode de jeu.");
+                    RedisDataSender.publisher.publish("proxy#say#" + player + "#§cVotre groupe contient trop de joueurs pour ce mode de jeu.");
                     return;
                 }
 
-                RedisDataSender.getPublisher.publish("queuejoinedmsg#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()));
+                RedisDataSender.publisher.publish("proxy#gamesearchmsg#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()));
 
-                Game game = Main.findGame(gameMap.getGameOption(), gameMap.getGameType());
-                if (game == null) {
-                    Main.logError("[Subscriber] Game '" + gameMap.getGameOption() + "' is null, creating it.");
-                    game = new Game(gameMap.getGameType(), gameMap.getMaxPlayers(), gameMap.getGameOption());
+                int game = GameData.getValidGame(gameMap, requiredSlots);
+                if (game == 0) {
+                    logger.error("[Subscriber] Can't find any game for option " + gameMap.getGameOption() + ", creating a fresh game.");
+                    RedisDataSender.publisher.publish("proxy#creatinggamemsg#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()));
+                    GameData.createGame(gameMap, player);
+                } else {
+                    RedisDataSender.publisher.publish("proxy#gamefound#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()) + "#" + gameMap.getGameType() + game);
                 }
-
-                Main.logInfo("[Subscriber] GameOption: " + game.getOption());
-                Main.logInfo("[Subscriber] Game: " + game.getGameType());
-
-                findGame(player, gameMap, game, requiredSlots);
-
-            } else if (msg[0].equals("delete")) {
-                String typeGame = msg[1];
-                int port = Integer.parseInt(msg[2]);
-                Main.logInfo("[Subscriber] Received packet delete#" + typeGame + "#" + port);
-
-                Game game = Main.findGame(port);
-                if (game == null) {
-                    Main.logError("[Subscriber] Game '" + typeGame + port + "' is null !");
-                    return;
-                }
-                Main.logInfo("[Subscriber] GameType to delete: " + game.getOption());
-                if (new File(game.getGame(port)).exists()) {
-                    try {
-                        FileUtils.deleteDirectory(new File(game.getGame(port)));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                game.removeStartedGame(port, false);
-            } else if (msg[0].equals("random")) {
-                String playerName = msg[1];
-                if (Main.partyMembers.contains(playerName)) {
-                    RedisDataSender.getPublisher.publish("say#" + playerName + "#§cSeul le chef de votre groupe peut rejoindre une file d'attente.");
+            } else if (packet[1].equals("delete")) {
+                int port = Integer.parseInt(packet[2]);
+                logger.println("[Subscriber] Received packet delete#" + port + ", deleting game in 3 seconds...");
+                new java.util.Timer().schedule(
+                        new java.util.TimerTask() {
+                            @Override
+                            public void run() {
+                                GameData.waitingGames.remove(port);
+                                GameData.busyGames.remove(port);
+                                GameData.unusedPorts.add(port);
+                            }
+                        },
+                        3000
+                        );
+            } else if (packet[1].equals("flushplayer")) {
+                String player = packet[2];
+                logger.debug("[Subscriber] Flushing player " + player + "...");
+                GameData.waitingPlayers.remove(player);
+            } else if (packet[1].equals("random")) {
+                final String player = packet[2];
+                if (partyMembers.contains(player)) {
+                    RedisDataSender.publisher.publish("proxy#say#" + player + "#§cSeul le chef de votre groupe peut rejoindre une file d'attente.");
                     return;
                 }
                 int requiredSlots = 1;
-                if (Main.partySlotsByLeader.containsKey(playerName)) {
-                    requiredSlots = Main.partySlotsByLeader.get(playerName);
+                if (partySlotsByLeader.containsKey(player)) {
+                    requiredSlots = partySlotsByLeader.get(player);
                 }
-                ArrayList<Game> game = Main.findGame(msg[2]);
 
-                if (game.size() == 0) {
-                    RedisDataSender.getPublisher.publish("say#" + playerName + "#Aucun joueur n'est actuellement dans ce mode de jeu, si vous tenez à jouer à ce mode de jeu," +
-                            "merci de choisir une option.");
-
+                logger.println("[Subscriber] Received packet 'random#" + player + "' from Proxy");
+                
+                int game = GameData.getRandomGame(requiredSlots);
+                if (game == 0) {
+                    logger.error("[Subscriber] Can't find any random game.");
+                    RedisDataSender.publisher.publish("proxy#norandomgamemsg#" + player);
+                } else {
+                    logger.success("[Subscriber] Found the random game no." + game + " for " + player + ".");
+                    RedisDataSender.publisher.publish("proxy#randomgamefound#" + player + "#" + GameManager.getInstance().getConfig().getGame() + game);
+                }
+            } else if (packet[1].equals("wakeup")) {
+                final int port = Integer.parseInt(packet[2]);
+                logger.println("[Subscriber] Server no. " + port + " just woke up!");
+                if (!GameData.startingGames.containsKey(port)) {
+                    logger.error("[Subscriber] FATAL ERROR: Server is not in a starting state.");
                     return;
                 }
-                RedisRequestData bestServer = null;
-                for (Game typeGame : game) {
-                    RedisRequestData data = typeGame.findBetterGame(requiredSlots);
-                    if (data == null) break;
-                    if (bestServer == null) {
-                        bestServer = data;
-                    } else {
-                        if (bestServer.getOnlinePlayers() < data.getOnlinePlayers()) {
-                            bestServer = data;
-                        }
-                    }
+                GameData.waitingGames.put(port, GameData.startingGames.get(port));
+                GameData.startingGames.remove(port);
+                logger.println("[Subscriber] Sending waiting players to game no. " + port + "...");
+                for (String players : GameData.getWaitingPlayers(port)) {
+                    RedisDataSender.publisher.publish("proxy#send#" + players + "#" + GameManager.getInstance().getConfig().getGame() + port);
                 }
-                if (bestServer == null) {
-                    Game type = game.get(0);
-                    if (type == null) {
-                        Main.logError("[Subscriber] Error while creating game for type " + msg[2]);
-                        RedisDataSender.getPublisher.publish("say#" + playerName + "#Aucun joueur n'est actuellement en attente dans ce mode de jeu, si vous tenez à jouer à ce mode de jeu," +
-                                "merci de choisir une option.");
-                        return;
-                    }
-                    String option = type.getOption();
-                    try {
-                        GameMapOption gameMap = Main.getOptionByName(option, type.getGameType());
-                        if (gameMap == null) {
-                            RedisDataSender.getPublisher.publish("say#" + playerName + "#Aucun joueur n'est actuellement en attente dans ce mode de jeu, si vous tenez à jouer à ce mode de jeu," +
-                                    "merci de choisir une option.");
-                            return;
-                        }
-                        findGame(playerName, gameMap, type, requiredSlots);
-                    } catch (Exception e) {
-                        RedisDataSender.getPublisher.publish("say#" + playerName + "#Aucun joueur n'est actuellement en attente dans ce mode de jeu, si vous tenez à jouer à ce mode de jeu," +
-                                "merci de choisir une option.");
-                    }
-                } else {
-                    String serverName = bestServer.getServerName();
-                    RedisDataSender.getPublisher.publish("send#" + playerName + "#" + serverName);
+            } else if (packet[1].equals("nowbusy")) {
+                final int port = Integer.parseInt(packet[2]);
+                logger.println("[Subscriber] Server no. " + port + " going into busy mode!");
+                if (!GameData.waitingGames.containsKey(port)) {
+                    logger.error("[Subscriber] FATAL ERROR: Server is not in a waiting state.");
+                    return;
                 }
+                GameData.busyGames.put(port, GameData.waitingGames.get(port));
+                GameData.waitingGames.remove(port);
             }
         }
-    }
-
-    public void findGame(final String player, final GameMapOption gameMap, final Game game, final int requiredSlots) {
-        String validGame = game.findValidGame(requiredSlots);
-        if (validGame == null) {
-            if (!game.gameRecentlyCreated()) {
-                game.setGameRecentlyCreated();
-                int port = 0;
-                if (Main.freePort.size() != 0) {
-                    port = Main.freePort.get(0);
-                    Main.freePort.remove((Object) port);
-                } else {
-                    port = Main.port;
-                    Main.port++;
-                }
-                final int finalPort = port;
-                final Game finalGame = game;
-                //Creation du serveur
-                Main.logSuccess("[findGame] Found available port: " + port);
-                final CreateServer newSrv = new CreateServer(game, gameMap, port);
-                newSrv.copyGameServer();
-                RedisDataSender.getPublisher.publish("createsrv#" + finalGame.getGameType() + "#" + finalPort + "#" + player);
-                new java.util.Timer().schedule(
-                        new java.util.TimerTask() {
-                            @Override
-                            public void run() {
-                                newSrv.runServer();
-                            }
-                        },
-                        2000
-                        );
-            } else {
-                new java.util.Timer().schedule(
-                        new java.util.TimerTask() {
-                            @Override
-                            public void run() {
-                                findGame(player, gameMap, game, requiredSlots);
-                            }
-                        },
-                        6000
-                        );
-            }
-        } else {
-            Main.logInfo("[findGame] Send player to: " + validGame);
-            RedisDataSender.getPublisher.publish("send#" + player + "#" + validGame);
-        }
-
     }
 }
