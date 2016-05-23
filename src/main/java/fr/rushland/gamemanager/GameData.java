@@ -74,7 +74,7 @@ public class GameData {
 
     public static void createGame(GameMapOption option, String player) {
         int port = unusedPorts.get(0);
-        unusedPorts.remove(port);
+        unusedPorts.remove((Object) port);
         waitingPlayers.put(player, port);
         startingGames.put(port, option);
         String fullGameName = option.getGameType() + port;
