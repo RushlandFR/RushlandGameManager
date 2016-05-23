@@ -42,6 +42,10 @@ public class Subscriber extends JedisPubSub {
                 } else if (packet[1].equals("remove")) {
                     partySlotsByLeader.remove(leader);
                 }
+            } else if (packet[0].equals("flushplayer")) {
+                String player = packet[1];
+                logger.debug("[Subscriber] Flushing player " + player + "...");
+                GameData.waitingPlayers.remove(player);
             }
         } else if (channel.equals(RedisDataSender.channelSub)) {
             String[] packet = message.split("#");
@@ -77,7 +81,7 @@ public class Subscriber extends JedisPubSub {
                     return;
                 }
 
-                RedisDataSender.publisher.publish("proxy#gamesearchmsg#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()));
+                RedisDataSender.publisher.publish("proxy#gamesearchmsg#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()) + " " + gameMap.getGameOption());
 
                 int game = GameData.getValidGame(gameMap, requiredSlots);
                 if (game == 0) {
@@ -101,10 +105,6 @@ public class Subscriber extends JedisPubSub {
                         },
                         3000
                         );
-            } else if (packet[1].equals("flushplayer")) {
-                String player = packet[2];
-                logger.debug("[Subscriber] Flushing player " + player + "...");
-                GameData.waitingPlayers.remove(player);
             } else if (packet[1].equals("random")) {
                 final String player = packet[2];
                 if (partyMembers.contains(player)) {
@@ -116,6 +116,7 @@ public class Subscriber extends JedisPubSub {
                     requiredSlots = partySlotsByLeader.get(player);
                 }
 
+                RedisDataSender.publisher.publish("proxy#randomgamesearchmsg#" + player + "#" + CodeUtils.formatNPCType(GameManager.getInstance().getConfig().getGame()));
                 logger.println("[Subscriber] Received packet 'random#" + player + "' from Proxy");
                 
                 int game = GameData.getRandomGame(requiredSlots);
@@ -137,7 +138,7 @@ public class Subscriber extends JedisPubSub {
                 GameData.startingGames.remove(port);
                 logger.println("[Subscriber] Sending waiting players to game no. " + port + "...");
                 for (String players : GameData.getWaitingPlayers(port)) {
-                    RedisDataSender.publisher.publish("proxy#send#" + players + "#" + GameManager.getInstance().getConfig().getGame() + port);
+                    RedisDataSender.publisher.publish("proxy#gamefound#" + players + "#" + CodeUtils.formatNPCType(GameManager.getInstance().getConfig().getGame()) + "#" + GameManager.getInstance().getConfig().getGame() + port);
                 }
             } else if (packet[1].equals("nowbusy")) {
                 final int port = Integer.parseInt(packet[2]);
