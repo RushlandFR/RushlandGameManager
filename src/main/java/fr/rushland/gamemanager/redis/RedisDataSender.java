@@ -12,8 +12,8 @@ public class RedisDataSender {
 
     public static void setup(String gameType) {
         serverId = gameType;
-        subscribeChannels();
         logger = Logger.getLogger();
+        subscribeChannels();
     }
     
     private static void subscribeChannels() {
