@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.io.FileUtils;
 
+import fr.rushland.gamemanager.redis.RedisDataSender;
 import fr.rushland.gamemanager.redis.RedisRequestData;
 import fr.rushland.gamemanager.redis.RedisRequestHandler;
 
@@ -77,6 +78,8 @@ public class GameData {
         waitingPlayers.put(player, port);
         startingGames.put(port, option);
         String fullGameName = option.getGameType() + port;
+        logger.println("[" + fullGameName + "] Injecting into Proxy...");
+        RedisDataSender.publisher.publish("proxy#injectserver#" + port + "#" + fullGameName);
         logger.println("[" + fullGameName + "] Creating game...");
         String filePluginPath = null;
         switch (option.getGameType()) {

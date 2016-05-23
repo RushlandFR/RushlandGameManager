@@ -21,7 +21,6 @@ public class Subscriber extends JedisPubSub {
 
     @Override
     public void onMessage(String channel, String message) {
-        //Reçois les messages.
         if (channel.equals("RLGamePS")) {
             String[] packet = message.split("#");
             logger.println("[Subscriber] Received packet '" + message + "' from Proxy");
