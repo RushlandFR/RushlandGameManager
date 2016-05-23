@@ -51,7 +51,7 @@ public class Subscriber extends JedisPubSub {
             if (packet[1].equals("findGame")) {
                 final String player = packet[2];
                 if (partyMembers.contains(player)) {
-                    RedisDataSender.publisher.publish("proxy#say#" + player + "#§cSeul le chef de votre groupe peut rejoindre une file d'attente.");
+                    RedisDataSender.publisher.publish("proxy#onlyleadercanjoinmsg#" + player);
                     return;
                 }
                 int requiredSlots = 1;
@@ -73,7 +73,7 @@ public class Subscriber extends JedisPubSub {
                 }
 
                 if (requiredSlots > gameMap.getMaxPlayers()) {
-                    RedisDataSender.publisher.publish("proxy#say#" + player + "#§cVotre groupe contient trop de joueurs pour ce mode de jeu.");
+                    RedisDataSender.publisher.publish("proxy#groupsizeerrormsg#" + player);
                     return;
                 }
 
@@ -108,7 +108,7 @@ public class Subscriber extends JedisPubSub {
             } else if (packet[1].equals("random")) {
                 final String player = packet[2];
                 if (partyMembers.contains(player)) {
-                    RedisDataSender.publisher.publish("proxy#say#" + player + "#§cSeul le chef de votre groupe peut rejoindre une file d'attente.");
+                    RedisDataSender.publisher.publish("proxy#onlyleadercanjoinmsg#" + player);
                     return;
                 }
                 int requiredSlots = 1;
