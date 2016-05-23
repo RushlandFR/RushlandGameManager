@@ -31,8 +31,11 @@ public class GameData {
             HashMap<Integer, GameMapOption> waitingGamesCopy = new HashMap<>(waitingGames);
             for (Entry<Integer, GameMapOption> entry : waitingGamesCopy.entrySet()) {
                 RedisRequestData data = new RedisRequestHandler(entry.getValue().getGameType() + entry.getKey()).getData();
+                if (!data.getMotd().contains("Ouvert")) {
+                    continue;
+                }
                 int availableSlots = data.getMaxPlayers() - data.getOnlinePlayers();
-                if ((availableSlots >= slotsNeeded) && data.getMotd().equals("§2Ouvert")) {
+                if (availableSlots >= slotsNeeded) {
                     return entry.getKey();
                 }
             }
@@ -61,8 +64,11 @@ public class GameData {
                     continue;
                 }
                 RedisRequestData data = new RedisRequestHandler(option.getGameType() + entry.getKey()).getData();
+                if (!data.getMotd().contains("Ouvert")) {
+                    continue;
+                }
                 int availableSlots = data.getMaxPlayers() - data.getOnlinePlayers();
-                if ((availableSlots >= slotsNeeded) && data.getMotd().equals("§2Ouvert")) {
+                if (availableSlots >= slotsNeeded) {
                     return entry.getKey();
                 }
             }

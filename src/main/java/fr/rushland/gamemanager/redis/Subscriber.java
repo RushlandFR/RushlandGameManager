@@ -98,7 +98,7 @@ public class Subscriber extends JedisPubSub {
                 }
             } else if (packet[1].equals("delete")) {
                 int port = Integer.parseInt(packet[2]);
-                logger.println("[Subscriber] Received packet delete#" + port + ", deleting game in 3 seconds...");
+                logger.println("[Subscriber] Received packet delete#" + port + ", deleting game in 1 seconds...");
                 new java.util.Timer().schedule(
                         new java.util.TimerTask() {
                             @Override
@@ -108,7 +108,7 @@ public class Subscriber extends JedisPubSub {
                                 GameData.unusedPorts.add(port);
                             }
                         },
-                        3000
+                        1000
                         );
             } else if (packet[1].equals("random")) {
                 final String player = packet[2];
@@ -141,10 +141,18 @@ public class Subscriber extends JedisPubSub {
                 }
                 GameData.waitingGames.put(port, GameData.startingGames.get(port));
                 GameData.startingGames.remove(port);
-                logger.println("[Subscriber] Sending waiting players to game no. " + port + "...");
-                for (String players : GameData.getWaitingPlayers(port)) {
-                    RedisDataSender.publisher.publish("proxy#gamefound#" + players + "#" + CodeUtils.formatNPCType(GameManager.getInstance().getConfig().getGame()) + "#" + GameManager.getInstance().getConfig().getGame() + port);
-                }
+                logger.println("[Subscriber] Sending waiting players to game no. " + port + " in 0.5s...");
+                new java.util.Timer().schedule(
+                        new java.util.TimerTask() {
+                            @Override
+                            public void run() {
+                                for (String players : GameData.getWaitingPlayers(port)) {
+                                    RedisDataSender.publisher.publish("proxy#gamefound#" + players + "#" + CodeUtils.formatNPCType(GameManager.getInstance().getConfig().getGame()) + "#" + GameManager.getInstance().getConfig().getGame() + port);
+                                }
+                            }
+                        },
+                        500
+                        );
             } else if (packet[1].equals("nowbusy")) {
                 final int port = Integer.parseInt(packet[2]);
                 logger.println("[Subscriber] Server no. " + port + " going into busy mode!");

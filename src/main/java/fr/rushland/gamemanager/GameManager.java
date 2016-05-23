@@ -14,6 +14,7 @@ public class GameManager {
     private Logger logger;
     private final String configFile = "gamemanager.properties";
     private Configuration config;
+    private String gameType;
 
     public static void main(String[] args) {
         GameManager.instance = new GameManager();
@@ -47,6 +48,10 @@ public class GameManager {
         return this.config;
     }
     
+    public String getGameType() {
+        return this.gameType;
+    }
+    
     private void saveConfig() {
         try {
             PrintWriter writer = new PrintWriter(configFile, "UTF-8");
@@ -69,6 +74,7 @@ public class GameManager {
             Properties properties = new Properties();
             properties.load(reader);
             this.config.setGame(properties.getProperty("game"));
+            this.gameType = properties.getProperty("game");
             String[] portRange = properties.getProperty("port-range").split("-");
             this.config.setPortRange(new int[]{Integer.parseInt(portRange[0]), Integer.parseInt(portRange[1])});
             this.config.setDebug(Boolean.parseBoolean(properties.getProperty("debug")));
@@ -86,13 +92,29 @@ public class GameManager {
                 while (true) {
                     String next = scanner.next();
                     if (next.equalsIgnoreCase("help")) {
-                        //Soon
+                        logger.println("[Commands] Commands list:");
+                        logger.println("[Commands] waiting - Show waiting games");
+                        logger.println("[Commands] busy - Show busy games");
+                        logger.println("[Commands] starting - Show starting games");
+                        logger.println("[Commands] unused - Show unused ports");
+                        logger.println("[Commands] waitingplayers - Show waiting players");
+                        logger.println("[Commands] stop - Stop the GameManager");
                     } else if (next.equalsIgnoreCase("stop")) {
-                        logger.error("[GameManager] Stopping GameManager...");
+                        logger.error("[Commands] Stopping GameManager...");
                         scanner.close();
                         System.exit(0);
+                    } else if (next.equalsIgnoreCase("waiting")) {
+                        logger.println("[Commands] " + GameData.waitingGames.toString());
+                    } else if (next.equalsIgnoreCase("busy")) {
+                        logger.println("[Commands] " + GameData.busyGames.toString());
+                    } else if (next.equalsIgnoreCase("starting")) {
+                        logger.println("[Commands] " + GameData.startingGames.toString());
+                    } else if (next.equalsIgnoreCase("unused")) {
+                        logger.println("[Commands] " + GameData.unusedPorts.toString());
+                    } else if (next.equalsIgnoreCase("waitingplayers")) {
+                        logger.println("[Commands] " + GameData.waitingPlayers.toString());
                     } else {
-                        logger.error("[GameManager] Command not found.");
+                        logger.error("[Commands] Command not found.");
                     }
                 }
             }
