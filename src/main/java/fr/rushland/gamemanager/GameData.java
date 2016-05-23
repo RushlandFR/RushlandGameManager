@@ -187,8 +187,8 @@ public class GameData {
                     line = br.readLine();
                     oLine = line;
                 }
-                if (oLine.contains("game")) {
-                    oLine = oLine.replace("game", fullGameName);
+                if (oLine.contains("edit")) {
+                    oLine = oLine.replace("edit", fullGameName);
                 }
                 lines.add(oLine);
                 line = br.readLine();
