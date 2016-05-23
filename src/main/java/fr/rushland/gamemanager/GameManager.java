@@ -18,7 +18,7 @@ public class GameManager {
     public static void main(String[] args) {
         GameManager.instance = new GameManager();
         GameManager.instance.logger = Logger.getLogger();
-        GameManager.instance.start();
+        GameManager.instance.start(); 
     }
 
     private void start() {
