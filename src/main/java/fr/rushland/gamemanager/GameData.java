@@ -57,7 +57,7 @@ public class GameData {
     }
 
     public static int getValidGame(GameMapOption option, int slotsNeeded) {
-        if (waitingGames.containsKey(option)) {
+        if (waitingGames.containsValue(option)) {
             HashMap<Integer, GameMapOption> waitingGamesCopy = new HashMap<>(waitingGames);
             for (Entry<Integer, GameMapOption> entry : waitingGamesCopy.entrySet()) {
                 if (entry.getValue() != option) {
