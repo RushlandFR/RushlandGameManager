@@ -60,25 +60,20 @@ public class GameData {
         if (waitingGames.containsValue(option.getGameOption())) {
             HashMap<Integer, String> waitingGamesCopy = new HashMap<>(waitingGames);
             for (Entry<Integer, String> entry : waitingGamesCopy.entrySet()) {
-                if (entry.getValue() != option.getGameOption()) {
-                    logger.println("Value != option");
+                if (!entry.getValue().equals(option.getGameOption())) {
                     continue;
                 }
                 RedisRequestData data = new RedisRequestHandler(GameManager.getInstance().getGameType() + entry.getKey()).getData();
                 if (!data.getMotd().contains("Ouvert")) {
-                    logger.println("Bad MOTD");
                     continue;
                 }
                 int availableSlots = data.getMaxPlayers() - data.getOnlinePlayers();
                 if (availableSlots >= slotsNeeded) {
                     return entry.getKey();
                 }
-                logger.println("Bad slots");
             }
-            logger.println("End of for");
             return 0;
         } else {
-            logger.println("ContainsValue False");
             return 0;
         }
     }
