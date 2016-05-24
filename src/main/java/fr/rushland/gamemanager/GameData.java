@@ -19,18 +19,18 @@ import fr.rushland.gamemanager.redis.RedisRequestHandler;
 
 public class GameData {
 
-    public static HashMap<Integer, GameMapOption> waitingGames = new HashMap<>();
-    public static HashMap<Integer, GameMapOption> busyGames = new HashMap<>();
-    public static HashMap<Integer, GameMapOption> startingGames = new HashMap<>();
+    public static HashMap<Integer, String> waitingGames = new HashMap<>();
+    public static HashMap<Integer, String> busyGames = new HashMap<>();
+    public static HashMap<Integer, String> startingGames = new HashMap<>();
     public static ArrayList<Integer> unusedPorts = new ArrayList<>();
     public static HashMap<String, Integer> waitingPlayers = new HashMap<>();
     private static Logger logger = Logger.getLogger();
     
     public static int getRandomGame(int slotsNeeded) {
         if (!waitingGames.isEmpty()) {
-            HashMap<Integer, GameMapOption> waitingGamesCopy = new HashMap<>(waitingGames);
-            for (Entry<Integer, GameMapOption> entry : waitingGamesCopy.entrySet()) {
-                RedisRequestData data = new RedisRequestHandler(entry.getValue().getGameType() + entry.getKey()).getData();
+            HashMap<Integer, String> waitingGamesCopy = new HashMap<>(waitingGames);
+            for (Entry<Integer, String> entry : waitingGamesCopy.entrySet()) {
+                RedisRequestData data = new RedisRequestHandler(GameManager.getInstance().getGameType() + entry.getKey()).getData();
                 if (!data.getMotd().contains("Ouvert")) {
                     continue;
                 }
@@ -57,23 +57,28 @@ public class GameData {
     }
 
     public static int getValidGame(GameMapOption option, int slotsNeeded) {
-        if (waitingGames.containsValue(option)) {
-            HashMap<Integer, GameMapOption> waitingGamesCopy = new HashMap<>(waitingGames);
-            for (Entry<Integer, GameMapOption> entry : waitingGamesCopy.entrySet()) {
-                if (entry.getValue() != option) {
+        if (waitingGames.containsValue(option.getGameOption())) {
+            HashMap<Integer, String> waitingGamesCopy = new HashMap<>(waitingGames);
+            for (Entry<Integer, String> entry : waitingGamesCopy.entrySet()) {
+                if (entry.getValue() != option.getGameOption()) {
+                    logger.println("Value != option");
                     continue;
                 }
-                RedisRequestData data = new RedisRequestHandler(option.getGameType() + entry.getKey()).getData();
+                RedisRequestData data = new RedisRequestHandler(GameManager.getInstance().getGameType() + entry.getKey()).getData();
                 if (!data.getMotd().contains("Ouvert")) {
+                    logger.println("Bad MOTD");
                     continue;
                 }
                 int availableSlots = data.getMaxPlayers() - data.getOnlinePlayers();
                 if (availableSlots >= slotsNeeded) {
                     return entry.getKey();
                 }
+                logger.println("Bad slots");
             }
+            logger.println("End of for");
             return 0;
         } else {
+            logger.println("ContainsValue False");
             return 0;
         }
     }
@@ -82,13 +87,13 @@ public class GameData {
         int port = unusedPorts.get(0);
         unusedPorts.remove((Object) port);
         waitingPlayers.put(player, port);
-        startingGames.put(port, option);
-        String fullGameName = option.getGameType() + port;
+        startingGames.put(port, option.getGameOption());
+        String fullGameName = GameManager.getInstance().getGameType() + port;
         logger.println("[" + fullGameName + "] Injecting into Proxy...");
         RedisDataSender.publisher.publish("proxy#injectserver#" + port + "#" + fullGameName);
         logger.println("[" + fullGameName + "] Creating game...");
         String filePluginPath = null;
-        switch (option.getGameType()) {
+        switch (GameManager.getInstance().getGameType()) {
             case ("rush"):
                 filePluginPath = "RLGame-Rush";
                 break;
@@ -114,7 +119,7 @@ public class GameData {
                 filePluginPath = "RushlandPVPBox";
                 break;
         }
-        String path = "/home/rushland-games/" + option.getGameType() + "/" + fullGameName + "/plugins/" + filePluginPath;
+        String path = "/home/rushland-games/" + GameManager.getInstance().getGameType() + "/" + fullGameName + "/plugins/" + filePluginPath;
         if (new File(path + "/config.yml").exists()) {
             try {
                 logger.println("[" + fullGameName + "] Deleting previous yaml config plugin");
@@ -129,7 +134,7 @@ public class GameData {
             BufferedWriter bf = new BufferedWriter(fw);
             bf.write("id: " + port);
             bf.newLine();
-            if (!option.getGameType().equals("antwars"))
+            if (!GameManager.getInstance().getGameType().equals("antwars"))
                 bf.write("teams: " + option.withTeam());
             else
                 bf.write("mini: " + option.withTeam());
@@ -143,7 +148,7 @@ public class GameData {
             e.printStackTrace();
         }
 
-        path = "/home/rushland-games/" + option.getGameType() + "/" + fullGameName + "/server.properties";
+        path = "/home/rushland-games/" + GameManager.getInstance().getGameType() + "/" + fullGameName + "/server.properties";
         file = new File(path);
         List<String> lines = new ArrayList<String>();
         try {

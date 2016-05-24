@@ -23,7 +23,7 @@ public class Subscriber extends JedisPubSub {
     public void onMessage(String channel, String message) {
         if (channel.equals("RLGamePS")) {
             String[] packet = message.split("#");
-            logger.println("[Subscriber] Received packet '" + message + "' from Proxy");
+            //logger.println("[Subscriber] Received packet '" + message + "' from Proxy");
             if (packet[0].equals("members")) {
                 String member = packet[2];
                 if (packet[1].equals("add")) {
@@ -44,7 +44,7 @@ public class Subscriber extends JedisPubSub {
                 }
             } else if (packet[0].equals("flushplayer")) {
                 String player = packet[1];
-                logger.debug("[Subscriber] Flushing player " + player + "...");
+                //logger.debug("[Subscriber] Flushing player " + player + "...");
                 GameData.waitingPlayers.remove(player);
             }
         } else if (channel.equals(RedisDataSender.channelSub)) {
