@@ -39,7 +39,7 @@ public class GameManager {
         logger.println("[GameManager] Ready!");
         startCommandScanner();
     }
-    
+
     public static GameManager getInstance() {
         return instance;
     }
@@ -47,11 +47,11 @@ public class GameManager {
     public Configuration getConfig() {
         return this.config;
     }
-    
+
     public String getGameType() {
         return this.gameType;
     }
-    
+
     private void saveConfig() {
         try {
             PrintWriter writer = new PrintWriter(configFile, "UTF-8");
@@ -100,21 +100,23 @@ public class GameManager {
                         logger.println("[Commands] waitingplayers - Show waiting players");
                         logger.println("[Commands] stop - Stop the GameManager");
                     } else if (next.equalsIgnoreCase("stop")) {
+                        logger.error("[Commands] Stopping Games...");
+                        RedisDataSender.publisher.publish(GameManager.getInstance().getGameType() + "#shutdown");
                         logger.error("[Commands] Stopping GameManager...");
                         scanner.close();
                         System.exit(0);
                     } else if (next.equalsIgnoreCase("waiting")) {
-                        logger.println("[Commands] " + GameData.waitingGames.toString());
+                        logger.println("[Commands] Waiting games: " + GameData.waitingGames.toString());
                     } else if (next.equalsIgnoreCase("busy")) {
-                        logger.println("[Commands] " + GameData.busyGames.toString());
+                        logger.println("[Commands] Busy games: " + GameData.busyGames.toString());
                     } else if (next.equalsIgnoreCase("starting")) {
-                        logger.println("[Commands] " + GameData.startingGames.toString());
+                        logger.println("[Commands] Starting games: " + GameData.startingGames.toString());
                     } else if (next.equalsIgnoreCase("unused")) {
-                        logger.println("[Commands] " + GameData.unusedPorts.toString());
+                        logger.println("[Commands] Unused ports: " + GameData.unusedPorts.toString());
                     } else if (next.equalsIgnoreCase("waitingplayers")) {
-                        logger.println("[Commands] " + GameData.waitingPlayers.toString());
+                        logger.println("[Commands] Waiting players: " + GameData.waitingPlayers.toString());
                     } else {
-                        logger.error("[Commands] Command not found.");
+                        logger.error("[Commands] Command not found. Type 'help' to get a list of commands.");
                     }
                 }
             }
