@@ -14,7 +14,6 @@ import java.util.HashMap;
 
 public class Subscriber extends JedisPubSub {
 
-    public static HashMap<String, GameMapOption> playerCancelled = new HashMap<>();
     public static ArrayList<String> partyMembers = new ArrayList<String>();
     public static HashMap<String, Integer> partySlotsByLeader = new HashMap<String, Integer>();
     private static Logger logger = Logger.getLogger();
