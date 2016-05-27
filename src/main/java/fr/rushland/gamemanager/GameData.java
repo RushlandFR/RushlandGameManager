@@ -176,7 +176,7 @@ public class GameData {
         logger.println("[" + fullGameName + "] Game created. Starting it...");
 
         try {
-            FileUtils.copyFile(new File("run.sh"), new File(fullGameName + ".sh"));
+            FileUtils.copyFile(new File("copy.sh"), new File(fullGameName + ".sh"));
         } catch (IOException e) {
             e.printStackTrace();
         }
