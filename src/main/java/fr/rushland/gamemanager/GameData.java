@@ -31,6 +31,9 @@ public class GameData {
             HashMap<Integer, String> waitingGamesCopy = new HashMap<>(waitingGames);
             for (Entry<Integer, String> entry : waitingGamesCopy.entrySet()) {
                 RedisRequestData data = new RedisRequestHandler(GameManager.getInstance().getGameType() + entry.getKey()).getData();
+                if (data == null) {
+                    continue;
+                }
                 if (!data.getMotd().contains("Ouvert")) {
                     continue;
                 }
