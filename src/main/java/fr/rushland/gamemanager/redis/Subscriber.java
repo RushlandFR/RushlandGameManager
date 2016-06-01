@@ -143,6 +143,7 @@ public class Subscriber extends JedisPubSub {
                     @Override
                     public void run() {
                         for (String players : GameData.getWaitingPlayers(port)) {
+                            GameData.waitingPlayers.remove(players);
                             RedisDataSender.publisher.publish("proxy#gamefound#" + players + "#" + CodeUtils.formatNPCType(GameManager.getInstance().getConfig().getGame()) + "#" + GameManager.getInstance().getConfig().getGame() + port);
                         }
                     }
