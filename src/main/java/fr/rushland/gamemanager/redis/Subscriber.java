@@ -93,7 +93,7 @@ public class Subscriber extends JedisPubSub {
                     RedisDataSender.publisher.publish("proxy#creatinggamemsg#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()));
                     GameData.createGame(gameMap, player);
                 } else {
-                    RedisDataSender.publisher.publish("proxy#gamefound#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()) + "#" + gameMap.getGameType() + game);
+                    RedisDataSender.publisher.publish("proxy#gamefound#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()) + "#" + gameMap.getGameType() + game + "#" + game);
                 }
             } else if (packet[1].equals("delete")) {
                 int port = Integer.parseInt(packet[2]);
@@ -127,7 +127,7 @@ public class Subscriber extends JedisPubSub {
                     RedisDataSender.publisher.publish("proxy#norandomgamemsg#" + player);
                 } else {
                     logger.success("[Subscriber] Found the random game no." + game + " for " + player + ".");
-                    RedisDataSender.publisher.publish("proxy#randomgamefound#" + player + "#" + GameManager.getInstance().getConfig().getGame() + game);
+                    RedisDataSender.publisher.publish("proxy#randomgamefound#" + player + "#" + GameManager.getInstance().getConfig().getGame() + game + "#" + game);
                 }
             } else if (packet[1].equals("wakeup")) {
                 final int port = Integer.parseInt(packet[2]);
