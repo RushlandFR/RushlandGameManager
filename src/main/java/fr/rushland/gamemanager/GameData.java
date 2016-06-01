@@ -67,6 +67,9 @@ public class GameData {
                     continue;
                 }
                 RedisRequestData data = new RedisRequestHandler(GameManager.getInstance().getGameType() + entry.getKey()).getData();
+                if (data == null) {
+                    continue;
+                }
                 if (!data.getMotd().contains("Ouvert")) {
                     continue;
                 }
