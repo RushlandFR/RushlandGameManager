@@ -116,9 +116,6 @@ public class GameData {
             case ("antwars"):
                 filePluginPath = "RLGame-AntWars";
                 break;
-            case ("pvpbox"):
-                filePluginPath = "RushlandPVPBox";
-                break;
         }
         String path = "/home/rushland-games/" + GameManager.getInstance().getGameType() + "/" + fullGameName + "/plugins/" + filePluginPath;
         if (new File(path + "/config.yml").exists()) {
