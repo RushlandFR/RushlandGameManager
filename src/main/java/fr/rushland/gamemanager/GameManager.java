@@ -7,6 +7,7 @@ import java.util.Properties;
 import java.util.Scanner;
 
 import fr.rushland.gamemanager.redis.RedisDataSender;
+import fr.rushland.gamemanager.utils.HoloCount;
 
 public class GameManager {
 
@@ -36,6 +37,8 @@ public class GameManager {
         }
         logger.println("[GameManager] Loading Redis...");
         RedisDataSender.setup("gamemanager");
+        logger.println("[GameManager] Loading HoloCount...");
+        HoloCount.load();
         logger.println("[GameManager] Ready!");
         startCommandScanner();
     }
