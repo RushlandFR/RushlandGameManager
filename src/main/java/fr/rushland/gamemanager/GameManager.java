@@ -38,7 +38,7 @@ public class GameManager {
         logger.println("[GameManager] Loading Redis...");
         RedisDataSender.setup("gamemanager");
         logger.println("[GameManager] Loading HoloCount...");
-        HoloCount.load();
+        new HoloCount(gameType);
         logger.println("[GameManager] Ready!");
         startCommandScanner();
     }
