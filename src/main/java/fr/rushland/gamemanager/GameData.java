@@ -25,7 +25,7 @@ public class GameData {
     public static ArrayList<Integer> unusedPorts = new ArrayList<>();
     public static HashMap<String, Integer> waitingPlayers = new HashMap<>();
     private static Logger logger = Logger.getLogger();
-    
+
     public static int getRandomGame(int slotsNeeded) {
         if (!waitingGames.isEmpty()) {
             HashMap<Integer, String> waitingGamesCopy = new HashMap<>(waitingGames);
@@ -47,7 +47,7 @@ public class GameData {
             return 0;
         }
     }
-    
+
     public static ArrayList<String> getWaitingPlayers(int port) {
         ArrayList<String> players = new ArrayList<>();
         HashMap<String, Integer> waitingPlayersCopy = new HashMap<>(waitingPlayers);
@@ -97,25 +97,25 @@ public class GameData {
         switch (GameManager.getInstance().getGameType()) {
             case ("rush"):
                 filePluginPath = "RLGame-Rush";
-                break;
+            break;
             case ("rushtheflag"):
                 filePluginPath = "RLGame-RushTheFlag";
-                break;
+            break;
             case ("rushevent"):
                 filePluginPath = "RLGame-RushEvent";
-                break;
+            break;
             case ("skywars"):
                 filePluginPath = "RLGame-SkyWars";
-                break;
+            break;
             case ("divided"):
                 filePluginPath = "RLGame-DividedTogether";
-                break;
+            break;
             case ("buildchampion"):
                 filePluginPath = "RLGame-BuildChampion";
-                break;
+            break;
             case ("antwars"):
                 filePluginPath = "RLGame-AntWars";
-                break;
+            break;
         }
         String path = "/home/rushland-games/" + GameManager.getInstance().getGameType() + "/" + fullGameName + "/plugins/" + filePluginPath;
         if (new File(path + "/config.yml").exists()) {
@@ -224,19 +224,16 @@ public class GameData {
             String command = "./" + fullGameName + ".sh";
             Runtime.getRuntime().exec(command);
             logger.success("[" + fullGameName + "] Server started.");
-            new java.util.Timer().schedule(
-                    new java.util.TimerTask() {
-                        @Override
-                        public void run() {
-                            try {
-                                FileUtils.forceDelete(new File(fullGameName + ".sh"));
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    },
-                    500
-                    );
+            new java.util.Timer().schedule(new java.util.TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        FileUtils.forceDelete(new File(fullGameName + ".sh"));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, 500);
         } catch (Exception e) {
             logger.error("[" + fullGameName + "] Error during server start");
             e.printStackTrace();
