@@ -35,12 +35,12 @@ public class HoloCount extends TimerTask {
         HashMap<Integer, String> waitingGamesCopy = new HashMap<>(GameData.waitingGames);
         HashMap<Integer, String> busyGamesCopy = new HashMap<>(GameData.busyGames);
         for (Entry<Integer, String> entry : waitingGamesCopy.entrySet()) {
-            RedisRequestData data = new RedisRequestHandler(this.gameType + entry.getKey()).getData();
+            RedisRequestData data = new RedisRequestHandler(gameType + entry.getKey()).getData();
             if (data == null) {
                 continue;
             }
             if (data.getMotd().contains("Ouvert")) {
-                if (this.gameType.equalsIgnoreCase("rushtheflag")) {
+                if (gameType.equalsIgnoreCase("rushtheflag")) {
                     busy = busy + data.getOnlinePlayers();
                 } else {
                     waiting = waiting + data.getOnlinePlayers();
@@ -50,12 +50,12 @@ public class HoloCount extends TimerTask {
             }
         }
         for (Entry<Integer, String> entry : busyGamesCopy.entrySet()) {
-            RedisRequestData data = new RedisRequestHandler(this.gameType + entry.getKey()).getData();
+            RedisRequestData data = new RedisRequestHandler(gameType + entry.getKey()).getData();
             if (data == null) {
                 continue;
             }
             if (data.getMotd().contains("Ouvert")) {
-                if (this.gameType.equalsIgnoreCase("rushtheflag")) {
+                if (gameType.equalsIgnoreCase("rushtheflag")) {
                     busy = busy + data.getOnlinePlayers();
                 } else {
                     waiting = waiting + data.getOnlinePlayers();
@@ -64,7 +64,7 @@ public class HoloCount extends TimerTask {
                 busy = busy + data.getOnlinePlayers();
             }
         }
-        RedisDataSender.publisher.publish("hub#holocount#" + this.gameType + "#waiting#" + waiting);
-        RedisDataSender.publisher.publish("hub#holocount#" + this.gameType + "#busy#" + busy);
+        RedisDataSender.publisher.publish("hub#holocount#" + gameType + "#waiting#" + waiting);
+        RedisDataSender.publisher.publish("hub#holocount#" + gameType + "#busy#" + busy);
     }
 }
