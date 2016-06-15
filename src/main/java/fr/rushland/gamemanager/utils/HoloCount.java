@@ -26,10 +26,6 @@ public class HoloCount extends TimerTask {
 
     @Override
     public void run() {
-        sendData();
-    }
-
-    private void sendData() {
         int waiting = 0;
         int busy = 0;
         HashMap<Integer, String> waitingGamesCopy = new HashMap<>(GameData.waitingGames);
