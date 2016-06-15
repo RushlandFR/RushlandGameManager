@@ -64,7 +64,9 @@ public class HoloCount extends TimerTask {
                 busy = busy + data.getOnlinePlayers();
             }
         }
+        int total = busy + waiting;
         RedisDataSender.publisher.publish("hub#holocount#" + gameType + "#waiting#" + waiting);
         RedisDataSender.publisher.publish("hub#holocount#" + gameType + "#busy#" + busy);
+        RedisDataSender.publisher.publish(gameType + "#rltrackplugin#" + total);
     }
 }
