@@ -20,7 +20,7 @@ public class HoloCount extends TimerTask {
         this.gameType = gameType;
         this.logger = Logger.getLogger();
         Timer timer = new Timer();
-        timer.scheduleAtFixedRate(this, new Date(), 5000);
+        timer.scheduleAtFixedRate(this, new Date(), 1000);
         logger.println("[HoloCount] Module loaded.");
     }
 
