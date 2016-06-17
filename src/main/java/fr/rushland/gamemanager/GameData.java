@@ -136,7 +136,6 @@ public class GameData {
                 bf.write("teams: " + option.withTeam());
             else
                 bf.write("mini: " + option.withTeam());
-
             bf.newLine();
             bf.write("map: " + option.getRandomMap());
             bf.flush();
