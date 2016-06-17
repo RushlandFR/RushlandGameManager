@@ -102,12 +102,43 @@ public class GameManager {
                         logger.println("[Commands] unused - Show unused ports");
                         logger.println("[Commands] waitingplayers - Show waiting players");
                         logger.println("[Commands] stop - Stop the GameManager");
+                        logger.println("[Commands] restart - Restart the GameManager");
                     } else if (next.equalsIgnoreCase("stop")) {
                         logger.error("[Commands] Stopping Games...");
                         RedisDataSender.publisher.publish(GameManager.getInstance().getGameType() + "#shutdown");
                         logger.error("[Commands] Stopping GameManager...");
                         scanner.close();
                         System.exit(0);
+                    } else if (next.equalsIgnoreCase("restart")) {
+                        logger.error("[Commands] Stopping Games...");
+                        RedisDataSender.publisher.publish(GameManager.getInstance().getGameType() + "#shutdown");
+                        logger.error("[Commands] Restarting GameManager...");
+                        scanner.close();
+                        Thread shutdownHook = new Thread() {
+                            @Override
+                            public void run() {
+                                try {
+                                    String os = System.getProperty("os.name").toLowerCase();
+                                    if (os.contains("win")) {
+                                        File script = new File("run.bat");
+                                        Runtime.getRuntime().exec("cmd /c start " + script.getPath());
+                                    } else {
+                                        File script = new File("./run.sh");
+                                        Runtime.getRuntime().exec(new String[]{"sh", script.getPath()});
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        };
+                        shutdownHook.setDaemon(true);
+                        Runtime.getRuntime().addShutdownHook(shutdownHook);
+                        try {
+                            Thread.sleep(500);
+                            System.exit(0);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     } else if (next.equalsIgnoreCase("waiting")) {
                         logger.println("[Commands] Waiting games: " + GameData.waitingGames.toString());
                     } else if (next.equalsIgnoreCase("busy")) {
