@@ -11,7 +11,7 @@ public class RedisRequestHandler {
     }
 
     public RedisRequestData getData() {
-        Jedis jedis = JedisFactory.getInstance().getJedisPool().getResource();
+        Jedis jedis = JedisFactory.getInstance().getResource();
         String rawData = jedis.get(serverName);
         jedis.close();
         if (rawData != null) {

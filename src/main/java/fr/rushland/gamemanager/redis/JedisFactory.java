@@ -1,17 +1,30 @@
 package fr.rushland.gamemanager.redis;
 
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 public class JedisFactory {
+    
     private static JedisFactory instance;
-    private static JedisPool jedisPool;
+    private JedisPool jedisPool;
+    private Jedis connection;
 
     public JedisFactory() {
-        jedisPool = new JedisPool("127.0.0.1", 6379);
+        JedisPoolConfig config = new JedisPoolConfig();
+        config.setTestOnBorrow(true);
+        jedisPool = new JedisPool(config, "127.0.0.1", 6379);
     }
-
-    public JedisPool getJedisPool() {
-        return jedisPool;
+    
+    public Jedis getResource() {
+        if (connection == null) {
+            connection = jedisPool.getResource();
+            return connection;
+        }
+        if (!connection.isConnected()) {
+            connection.connect();
+        }
+        return connection;
     }
 
     public static JedisFactory getInstance() {
