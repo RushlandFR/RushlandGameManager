@@ -17,7 +17,6 @@ public class RedisRequestHandler {
         try {
             jedis = jedisFactory.getPool().getResource();
             String rawData = jedis.get(serverName);
-            jedis.close();
             if (rawData != null) {
                 String[] rawDataTable = rawData.split("#");
                 return new RedisRequestData(serverName, rawDataTable[0], rawDataTable[1], rawDataTable[2], rawDataTable[3]);
