@@ -1,6 +1,7 @@
 package fr.rushland.gamemanager.redis;
 
 import fr.rushland.gamemanager.Logger;
+import redis.clients.jedis.Jedis;
 
 public class RedisDataSender {
 
@@ -8,10 +9,12 @@ public class RedisDataSender {
     public static String channelSub = "RLGameManager";
     public static Publisher publisher = null;
     private static Logger logger;
+    private static JedisFactory jedisFactory;
 
     public static void setup(String gameType) {
         serverId = gameType;
         logger = Logger.getLogger();
+        jedisFactory = JedisFactory.getInstance();
         subscribeChannels();
     }
     
@@ -22,7 +25,15 @@ public class RedisDataSender {
             public void run() {
                 try {
                     logger.println("[RedisDataSender] Subscribing to '" + channelSub + "' & 'RLGamePS' channel");
-                    JedisFactory.getInstance().getResource().subscribe(subscriber, channelSub, "RLGamePS");
+                    Jedis jedis = null;
+                    try {
+                        jedis = jedisFactory.getPool().getResource();
+                        jedis.subscribe(subscriber, channelSub, "RLGamePS");
+                    } finally {
+                        if (jedis != null) {
+                            jedis.close();
+                        }
+                    }
                     logger.success("[RedisDataSender] Subscription ended.");
                 } catch (Exception e) {
                     logger.error("[RedisDataSender] Subscribing failed");
