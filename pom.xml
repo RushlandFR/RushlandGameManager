@@ -12,7 +12,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<main.class>fr.rushland.gamemanager.GameManager</main.class>
+		<main.class>fr.aquazus.rushland.gamemanager.GameManager</main.class>
 	</properties>
 
 	<repositories>
@@ -102,7 +102,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>fr.rushland.gamemanager.GameManager</mainClass>
+							<mainClass>fr.aquazus.rushland.gamemanager.GameManager</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
