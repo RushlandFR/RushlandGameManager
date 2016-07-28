@@ -131,7 +131,7 @@ public class GameData {
                 filePluginPath = "RLGame-AntWars";
             break;
         }
-        String path = "/home/rushland-games/" + GameManager.getInstance().getGameType() + "/" + fullGameName + "/plugins/" + filePluginPath;
+        String path = "/home/rushland/games/" + GameManager.getInstance().getGameType() + "/" + fullGameName + "/plugins/" + filePluginPath;
         if (new File(path + "/config.yml").exists()) {
             try {
                 logger.println("[" + fullGameName + "] Deleting previous yaml config plugin");
@@ -159,7 +159,7 @@ public class GameData {
             e.printStackTrace();
         }
 
-        path = "/home/rushland-games/" + GameManager.getInstance().getGameType() + "/" + fullGameName + "/server.properties";
+        path = "/home/rushland/games/" + GameManager.getInstance().getGameType() + "/" + fullGameName + "/server.properties";
         file = new File(path);
         List<String> lines = new ArrayList<String>();
         try {
