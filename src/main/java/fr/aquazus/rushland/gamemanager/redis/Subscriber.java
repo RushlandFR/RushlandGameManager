@@ -103,9 +103,15 @@ public class Subscriber extends JedisPubSub {
 
                 int game = GameData.getValidGame(gameMap, requiredSlots);
                 if (game == 0) {
-                    logger.error("[Subscriber] Can't find any game for option " + gameMap.getGameOption() + ", creating a fresh game.");
-                    RedisDataSender.publisher.publish("proxy#creatinggamemsg#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()));
-                    GameData.createGame(gameMap, player);
+                    game = GameData.getValidStartingGame(gameMap, requiredSlots);
+                    if (game == 0) {
+                        logger.println("[Subscriber] Can't find any game for option " + gameMap.getGameOption() + ", creating a fresh game.");
+                        RedisDataSender.publisher.publish("proxy#creatinggamemsg#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()));
+                        GameData.createGame(gameMap, player, requiredSlots);
+                    } else {
+                        RedisDataSender.publisher.publish("proxy#creatinggamemsg#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()));
+                        GameData.waitingPlayers.put(player, game);
+                    }
                 } else {
                     RedisDataSender.publisher.publish("proxy#gamefound#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()) + "#" + gameMap.getGameType() + game + "#" + game);
                 }
@@ -152,6 +158,7 @@ public class Subscriber extends JedisPubSub {
                 }
                 GameData.waitingGames.put(port, GameData.startingGames.get(port));
                 GameData.startingGames.remove(port);
+                GameData.startingGamesCapacity.remove(port);
                 logger.println("[Subscriber] Sending waiting players to game no. " + port + " in 0.5s...");
                 new java.util.Timer().schedule(new java.util.TimerTask() {
                     @Override

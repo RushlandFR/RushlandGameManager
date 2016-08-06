@@ -38,6 +38,7 @@ public class GameData {
     public static HashMap<Integer, String> startingGames = new HashMap<>();
     public static ArrayList<Integer> unusedPorts = new ArrayList<>();
     public static HashMap<String, Integer> waitingPlayers = new HashMap<>();
+    public static HashMap<Integer, Integer> startingGamesCapacity = new HashMap<>();
     private static Logger logger = Logger.getLogger();
 
     public static int getRandomGame(int slotsNeeded) {
@@ -72,6 +73,22 @@ public class GameData {
         }
         return players;
     }
+    
+    public static int getValidStartingGame(GameMapOption option, int slotsNeeded) {
+        if (startingGames.containsValue(option.getGameOption())) {
+            HashMap<Integer, String> startingGamesCopy = new HashMap<>(startingGames);
+            for (Entry<Integer, String> entry : startingGamesCopy.entrySet()) {
+                if (!entry.getValue().equals(option.getGameOption())) {
+                    continue;
+                }
+                if (startingGamesCapacity.get(entry.getKey()) >= slotsNeeded) {
+                    startingGamesCapacity.put(entry.getKey(), startingGamesCapacity.get(entry.getKey()) - slotsNeeded);
+                    return entry.getKey();
+                }
+            }
+        }
+        return 0;
+    }
 
     public static int getValidGame(GameMapOption option, int slotsNeeded) {
         if (waitingGames.containsValue(option.getGameOption())) {
@@ -98,11 +115,12 @@ public class GameData {
         }
     }
 
-    public static void createGame(GameMapOption option, String player) {
+    public static void createGame(GameMapOption option, String player, int requiredSlots) {
         int port = unusedPorts.get(0);
         unusedPorts.remove((Object) port);
         waitingPlayers.put(player, port);
         startingGames.put(port, option.getGameOption());
+        startingGamesCapacity.put(port, requiredSlots);
         String fullGameName = GameManager.getInstance().getGameType() + port;
         logger.println("[" + fullGameName + "] Injecting into Proxy...");
         RedisDataSender.publisher.publish("proxy#injectserver#" + port + "#" + fullGameName);
