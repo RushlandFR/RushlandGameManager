@@ -93,7 +93,7 @@ public class Subscriber extends JedisPubSub {
                     logger.error("[Subscriber] GameMapOption is null !");
                     return;
                 }
-
+                
                 if (requiredSlots > gameMap.getMaxPlayers()) {
                     RedisDataSender.publisher.publish("proxy#groupsizeerrormsg#" + player);
                     return;

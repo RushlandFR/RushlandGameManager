@@ -174,6 +174,7 @@ public class GameData {
                 bf.write("mini: " + option.withTeam());
             bf.newLine();
             bf.write("noBow: " + option.getNoBow());
+            bf.newLine();
             bf.write("map: " + option.getRandomMap());
             bf.flush();
             bf.close();
