@@ -25,10 +25,11 @@ public class GameMapOption {
     private ArrayList<String> listMap = new ArrayList<String>();
     private int maxPlayers;
     private boolean team = false;
+    private boolean noBow = false;
     private String name;
     private int order;
 
-    public GameMapOption(String gameType, String option, ArrayList<String> listMap, int maxPlayers, String name, boolean team, int order) {
+    public GameMapOption(String gameType, String option, ArrayList<String> listMap, int maxPlayers, String name, boolean team, int order, boolean noBow) {
         this.gameType = gameType;
         this.gameOption = option;
         this.listMap = listMap;
@@ -36,6 +37,7 @@ public class GameMapOption {
         this.name = name;
         this.order = order;
         this.team = team;
+        this.noBow = noBow;
     }
 
     public String getGameType() {
@@ -61,6 +63,10 @@ public class GameMapOption {
 
     public int getOrder() {
         return this.order;
+    }
+    
+    public boolean getNoBow() {
+        return this.noBow;
     }
 
     public int getMaxPlayers() {
