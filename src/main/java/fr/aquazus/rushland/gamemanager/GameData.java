@@ -37,6 +37,7 @@ public class GameData {
     public static HashMap<Integer, String> busyGames = new HashMap<>();
     public static HashMap<Integer, String> startingGames = new HashMap<>();
     public static ArrayList<Integer> unusedPorts = new ArrayList<>();
+    public static ArrayList<String> seenOptions = new ArrayList<>();
     public static HashMap<String, Integer> waitingPlayers = new HashMap<>();
     public static HashMap<Integer, Integer> startingGamesCapacity = new HashMap<>();
     private static Logger logger = Logger.getLogger();
@@ -120,6 +121,9 @@ public class GameData {
         unusedPorts.remove((Object) port);
         waitingPlayers.put(player, port);
         startingGames.put(port, option.getGameOption());
+        if (!seenOptions.contains(option.getGameOption())) {
+            seenOptions.add(option.getGameOption());
+        }
         startingGamesCapacity.put(port, requiredSlots);
         String fullGameName = GameManager.getInstance().getGameType() + port;
         logger.println("[" + fullGameName + "] Injecting into Proxy...");

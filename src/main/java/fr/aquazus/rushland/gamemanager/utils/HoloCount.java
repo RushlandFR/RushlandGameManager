@@ -36,7 +36,7 @@ public class HoloCount extends TimerTask {
         this.logger = Logger.getLogger();
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(this, new Date(), 1000);
-        logger.println("[HoloCount] Module loaded.");
+        logger.println("[HoloCount v2] Module loaded.");
     }
 
     @Override
@@ -45,6 +45,12 @@ public class HoloCount extends TimerTask {
         int busy = 0;
         HashMap<Integer, String> waitingGamesCopy = new HashMap<>(GameData.waitingGames);
         HashMap<Integer, String> busyGamesCopy = new HashMap<>(GameData.busyGames);
+        HashMap<String, Integer> waitingOptions = new HashMap<>();
+        HashMap<String, Integer> busyOptions = new HashMap<>();
+        for (String seenOption : GameData.seenOptions) {
+            waitingOptions.put(seenOption, 0);
+            busyOptions.put(seenOption, 0);
+        }
         for (Entry<Integer, String> entry : waitingGamesCopy.entrySet()) {
             RedisRequestData data = new RedisRequestHandler(gameType + entry.getKey()).getData();
             if (data == null) {
@@ -53,11 +59,14 @@ public class HoloCount extends TimerTask {
             if (data.getMotd().contains("Ouvert")) {
                 if (gameType.equalsIgnoreCase("rushtheflag")) {
                     busy = busy + data.getOnlinePlayers();
+                    busyOptions.put(entry.getValue(), busyOptions.get(entry.getValue()) + data.getOnlinePlayers());
                 } else {
                     waiting = waiting + data.getOnlinePlayers();
+                    waitingOptions.put(entry.getValue(), waitingOptions.get(entry.getValue()) + data.getOnlinePlayers());
                 }
             } else {
                 busy = busy + data.getOnlinePlayers();
+                busyOptions.put(entry.getValue(), busyOptions.get(entry.getValue()) + data.getOnlinePlayers());
             }
         }
         for (Entry<Integer, String> entry : busyGamesCopy.entrySet()) {
@@ -68,16 +77,25 @@ public class HoloCount extends TimerTask {
             if (data.getMotd().contains("Ouvert")) {
                 if (gameType.equalsIgnoreCase("rushtheflag")) {
                     busy = busy + data.getOnlinePlayers();
+                    busyOptions.put(entry.getValue(), busyOptions.get(entry.getValue()) + data.getOnlinePlayers());
                 } else {
                     waiting = waiting + data.getOnlinePlayers();
+                    waitingOptions.put(entry.getValue(), waitingOptions.get(entry.getValue()) + data.getOnlinePlayers());
                 }
             } else {
                 busy = busy + data.getOnlinePlayers();
+                busyOptions.put(entry.getValue(), busyOptions.get(entry.getValue()) + data.getOnlinePlayers());
             }
         }
         int total = busy + waiting;
         RedisDataSender.publisher.publish("hub#holocount#" + gameType + "#waiting#" + waiting);
         RedisDataSender.publisher.publish("hub#holocount#" + gameType + "#busy#" + busy);
+        for (Entry<String, Integer> entry : waitingOptions.entrySet()) {
+            RedisDataSender.publisher.publish("hub#holocount#" + gameType + "#waiting#" + entry.getKey() + "#" + entry.getValue());
+        }
+        for (Entry<String, Integer> entry : busyOptions.entrySet()) {
+            RedisDataSender.publisher.publish("hub#holocount#" + gameType + "#busy#" + entry.getKey() + "#" + entry.getValue());
+        }
         RedisDataSender.publisher.publish(gameType + "#rltrackplugin#" + total);
     }
 }
