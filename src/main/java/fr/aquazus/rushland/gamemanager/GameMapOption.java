@@ -28,8 +28,9 @@ public class GameMapOption {
     private boolean team;
     private boolean noBow;
     private String tournamentCode;
+    private boolean canCreateTournament;
 
-    public GameMapOption(String gameType, String option, ArrayList<String> listMap, int maxPlayers, String name, int order, boolean team, boolean noBow, String tournamentCode) {
+    public GameMapOption(String gameType, String option, ArrayList<String> listMap, int maxPlayers, String name, int order, boolean team, boolean noBow, String tournamentCode, boolean canCreateTournament) {
         this.gameType = gameType;
         this.gameOption = option;
         this.listMap = listMap;
@@ -39,6 +40,7 @@ public class GameMapOption {
         this.team = team;
         this.noBow = noBow;
         this.tournamentCode = tournamentCode;
+        this.canCreateTournament = canCreateTournament;
     }
 
     public boolean withTeam() {
@@ -76,5 +78,9 @@ public class GameMapOption {
     
     public String getTournamentCode() {
         return this.tournamentCode;
+    }
+    
+    public boolean canCreateTournament() {
+        return this.canCreateTournament;
     }
 }

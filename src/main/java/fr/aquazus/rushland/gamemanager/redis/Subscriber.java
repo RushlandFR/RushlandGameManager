@@ -105,6 +105,10 @@ public class Subscriber extends JedisPubSub {
                 if (game == 0) {
                     game = GameData.getValidStartingGame(gameMap, requiredSlots);
                     if (game == 0) {
+                        if (gameMap.getTournamentCode() != null && !gameMap.canCreateTournament()) {
+                            RedisDataSender.publisher.publish("proxy#tournamentnotfound#" + player);
+                            return;
+                        }
                         logger.println("[Subscriber] Can't find any game for option " + gameMap.getGameOption() + ", creating a fresh game.");
                         RedisDataSender.publisher.publish("proxy#creatinggamemsg#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()));
                         GameData.createGame(gameMap, player, requiredSlots);
