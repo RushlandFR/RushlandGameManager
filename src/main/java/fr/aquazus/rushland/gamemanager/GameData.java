@@ -227,6 +227,7 @@ public class GameData {
             bf.write("noBow: " + option.getNoBow());
             bf.newLine();
             bf.write("map: " + option.getRandomMap());
+            bf.newLine();
             bf.write("tournament: " + (option.getTournamentCode() != null));
             bf.flush();
             bf.close();
