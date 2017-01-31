@@ -155,10 +155,13 @@ public class GameManager {
                         }
                     } else if (next.equalsIgnoreCase("waiting")) {
                         logger.println("[Commands] Waiting games: " + GameData.waitingGames.toString());
+                        logger.println("[Commands] Waiting tournaments: " + GameData.waitingTournaments.toString());
                     } else if (next.equalsIgnoreCase("busy")) {
                         logger.println("[Commands] Busy games: " + GameData.busyGames.toString());
+                        logger.println("[Commands] Busy tournaments: " + GameData.busyTournaments.toString());
                     } else if (next.equalsIgnoreCase("starting")) {
                         logger.println("[Commands] Starting games: " + GameData.startingGames.toString());
+                        logger.println("[Commands] Starting tournaments: " + GameData.startingTournaments.toString());
                     } else if (next.equalsIgnoreCase("unused")) {
                         logger.println("[Commands] Unused ports: " + GameData.unusedPorts.toString());
                     } else if (next.equalsIgnoreCase("waitingplayers")) {

@@ -122,8 +122,12 @@ public class Subscriber extends JedisPubSub {
                 new java.util.Timer().schedule(new java.util.TimerTask() {
                     @Override
                     public void run() {
+                        GameData.startingGames.remove(port);
                         GameData.waitingGames.remove(port);
                         GameData.busyGames.remove(port);
+                        GameData.startingTournaments.remove(port);
+                        GameData.waitingTournaments.remove(port);
+                        GameData.busyTournaments.remove(port);
                         GameData.unusedPorts.add(port);
                     }
                 }, 1000);
@@ -152,12 +156,18 @@ public class Subscriber extends JedisPubSub {
             } else if (packet[1].equals("wakeup")) {
                 final int port = Integer.parseInt(packet[2]);
                 logger.println("[Subscriber] Server no. " + port + " just woke up!");
-                if (!GameData.startingGames.containsKey(port)) {
+                if (!GameData.startingGames.containsKey(port) && !GameData.startingTournaments.containsKey(port)) {
                     logger.error("[Subscriber] FATAL ERROR: Server is not in a starting state.");
                     return;
                 }
-                GameData.waitingGames.put(port, GameData.startingGames.get(port));
-                GameData.startingGames.remove(port);
+                boolean tournament = GameData.startingTournaments.containsKey(port);
+                if (tournament) {
+                    GameData.waitingTournaments.put(port, GameData.startingTournaments.get(port));
+                    GameData.startingTournaments.remove(port);
+                } else {
+                    GameData.waitingGames.put(port, GameData.startingGames.get(port));
+                    GameData.startingGames.remove(port);
+                }
                 GameData.startingGamesCapacity.remove(port);
                 logger.println("[Subscriber] Sending waiting players to game no. " + port + " in 0.5s...");
                 new java.util.Timer().schedule(new java.util.TimerTask() {
@@ -172,12 +182,18 @@ public class Subscriber extends JedisPubSub {
             } else if (packet[1].equals("nowbusy")) {
                 final int port = Integer.parseInt(packet[2]);
                 logger.println("[Subscriber] Server no. " + port + " going into busy mode!");
-                if (!GameData.waitingGames.containsKey(port)) {
+                if (!GameData.waitingGames.containsKey(port) && !GameData.waitingTournaments.containsKey(port)) {
                     logger.error("[Subscriber] FATAL ERROR: Server is not in a waiting state.");
                     return;
                 }
-                GameData.busyGames.put(port, GameData.waitingGames.get(port));
-                GameData.waitingGames.remove(port);
+                boolean tournament = GameData.waitingTournaments.containsKey(port);
+                if (tournament) {
+                    GameData.busyTournaments.put(port, GameData.waitingTournaments.get(port));
+                    GameData.waitingTournaments.remove(port);
+                } else {
+                    GameData.busyGames.put(port, GameData.waitingGames.get(port));
+                    GameData.waitingGames.remove(port);
+                }
             }
         }
     }
