@@ -113,7 +113,7 @@ public class Subscriber extends JedisPubSub {
                         GameData.waitingPlayers.put(player, game);
                     }
                 } else {
-                    RedisDataSender.publisher.publish("proxy#gamefound#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()) + "#" + gameMap.getGameType() + game + "#" + game);
+                    RedisDataSender.publisher.publish("proxy#gamefound#" + player + "#" + CodeUtils.formatNPCType(gameMap.getGameType()) + "#" + (gameMap.getTournamentCode() == null ? "" : "tournois-") + gameMap.getGameType() + game + "#" + game);
                 }
             } else if (packet[1].equals("delete")) {
                 int port = Integer.parseInt(packet[2]);

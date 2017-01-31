@@ -175,7 +175,7 @@ public class GameData {
             fullGameName = gameId;
         } else {
             startingTournaments.put(port, option.getTournamentCode());
-            fullGameName = "tournament-" + GameManager.getInstance().getGameType() + port;
+            fullGameName = "tournois-" + gameId;
         }
         logger.println("[" + fullGameName + "] Injecting into Proxy...");
         RedisDataSender.publisher.publish("proxy#injectserver#" + port + "#" + fullGameName);
